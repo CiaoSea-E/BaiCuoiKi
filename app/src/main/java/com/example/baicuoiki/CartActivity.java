@@ -5,14 +5,27 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.DecimalFormat;
+import java.util.List;
 
 public class CartActivity extends AppCompatActivity {
 
     private ImageView btnBack;
-    private Button btnShopNow;
-    private LinearLayout layoutEmptyCart, layoutCartContent;
+    private Button btnShopNow, btnCheckout;
+    private LinearLayout layoutEmptyCart, layoutBottom;
+    private ConstraintLayout layoutCartContent;
+    private RecyclerView rvCart;
+    private TextView tvTotalCartPrice;
+    private CartAdapter cartAdapter;
+    private List<CartItem> cartItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,32 +33,60 @@ public class CartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cart);
 
         initViews();
-        checkCartState();
+        setupRecyclerView();
+        updateUI();
         setupClickEvents();
     }
 
     private void initViews() {
         btnBack = findViewById(R.id.btnBack);
         btnShopNow = findViewById(R.id.btnShopNow);
+        btnCheckout = findViewById(R.id.btnCheckout);
         layoutEmptyCart = findViewById(R.id.layoutEmptyCart);
         layoutCartContent = findViewById(R.id.layoutCartContent);
+        layoutBottom = findViewById(R.id.layoutBottom);
+        rvCart = findViewById(R.id.rvCart);
+        tvTotalCartPrice = findViewById(R.id.tvTotalCartPrice);
     }
 
-    private void checkCartState() {
-        if (CartManager.getInstance().getCartItems().isEmpty()) {
+    private void setupRecyclerView() {
+        cartItems = CartManager.getInstance().getCartItems();
+        cartAdapter = new CartAdapter(this, cartItems, this::updateUI);
+        rvCart.setLayoutManager(new LinearLayoutManager(this));
+        rvCart.setAdapter(cartAdapter);
+    }
+
+    private void updateUI() {
+        if (cartItems.isEmpty()) {
             layoutEmptyCart.setVisibility(View.VISIBLE);
             layoutCartContent.setVisibility(View.GONE);
+            layoutBottom.setVisibility(View.GONE);
         } else {
             layoutEmptyCart.setVisibility(View.GONE);
             layoutCartContent.setVisibility(View.VISIBLE);
+            layoutBottom.setVisibility(View.VISIBLE);
+            
+            // Cập nhật tổng tiền của các sản phẩm ĐÃ CHỌN
+            double total = CartManager.getInstance().getTotalCartPrice();
+            DecimalFormat formatter = new DecimalFormat("###,###,###");
+            tvTotalCartPrice.setText(formatter.format(total) + "đ");
         }
     }
 
     private void setupClickEvents() {
-        // Nút quay lại
         btnBack.setOnClickListener(v -> finish());
-
-        // Nút mua sắm ngay
         btnShopNow.setOnClickListener(v -> finish());
+
+        btnCheckout.setOnClickListener(v -> {
+            // Thực hiện đặt hàng cho các sản phẩm đã chọn
+            String result = CartManager.getInstance().placeOrder(this, "KH001", "Thanh toán khi nhận hàng");
+            if ("SUCCESS".equals(result)) {
+                Toast.makeText(this, "Đặt hàng thành công!", Toast.LENGTH_LONG).show();
+                updateUI();
+                cartAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

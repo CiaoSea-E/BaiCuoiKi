@@ -8,6 +8,7 @@ public class CartItem implements Serializable {
     private double price;
     private int quantity;
     private String image;
+    private boolean isSelected;
 
     public CartItem(String productId, String productName, double price, int quantity, String image) {
         this.productId = productId;
@@ -15,6 +16,7 @@ public class CartItem implements Serializable {
         this.price = price;
         this.quantity = Math.max(1, quantity);
         this.image = image;
+        this.isSelected = true; // Mặc định là được chọn
     }
 
     public String getProductId() { return productId; }
@@ -39,6 +41,9 @@ public class CartItem implements Serializable {
     }
 
     public String getImage() { return image; }
+
+    public boolean isSelected() { return isSelected; }
+    public void setSelected(boolean selected) { isSelected = selected; }
 
     public double getTotalPrice() {
         return price * quantity;

@@ -4,11 +4,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -45,7 +48,19 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.tvPrice.setText(formatter.format(item.getPrice()) + "đ");
         holder.tvQuantity.setText(String.valueOf(item.getQuantity()));
         
-        holder.imgProduct.setImageResource(R.drawable.ic_shopping_cart);
+        holder.cbSelect.setChecked(item.isSelected());
+
+        Glide.with(context)
+                .load(item.getImage())
+                .placeholder(R.drawable.ic_shopping_cart)
+                .error(R.drawable.ic_shopping_cart)
+                .into(holder.imgProduct);
+
+        // Sự kiện tích chọn sản phẩm
+        holder.cbSelect.setOnClickListener(v -> {
+            item.setSelected(holder.cbSelect.isChecked());
+            listener.onChange();
+        });
 
         holder.btnPlus.setOnClickListener(v -> {
             item.incrementQuantity();
@@ -74,6 +89,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct, btnRemove;
         TextView tvName, tvPrice, tvQuantity, btnPlus, btnMinus;
+        CheckBox cbSelect;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -84,6 +100,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             btnPlus = itemView.findViewById(R.id.btnPlus);
             btnMinus = itemView.findViewById(R.id.btnMinus);
+            cbSelect = itemView.findViewById(R.id.cbSelectItem);
         }
     }
 }

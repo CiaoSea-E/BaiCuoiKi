@@ -29,7 +29,7 @@ import java.util.List;
 
 import database.DatabaseHelper;
 
-public class SupplierActivity extends AppCompatActivity {
+public class  SupplierActivity extends AppCompatActivity {
 
     private ImageView btnBack, btnSearch;
     private EditText edtSearch;
