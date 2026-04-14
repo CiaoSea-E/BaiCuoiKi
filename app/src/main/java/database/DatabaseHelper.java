@@ -22,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE SAN_PHAM (maSanpham TEXT PRIMARY KEY, tenSanpham TEXT NOT NULL, maDanhMuc TEXT REFERENCES DANH_MUC_SP(maDanhMuc), hinhAnh TEXT, motaSanpham TEXT, donViTinh TEXT, giaDon REAL, soLuongTon INTEGER DEFAULT 0, hanSuDung TEXT, trangThai TEXT, maNCC TEXT REFERENCES NHA_CUNG_CAP(maNCC))");
         // 2. Phần của Đức Anh [cite: 36]
         db.execSQL("CREATE TABLE NHA_CUNG_CAP (maNCC TEXT PRIMARY KEY, tenNCC TEXT NOT NULL, sdt TEXT UNIQUE, email TEXT UNIQUE, diaChi TEXT, trangThai TEXT)");
-        db.execSQL("CREATE TABLE LICH_LAM_VIEC (maLich TEXT PRIMARY KEY, maNhanVien TEXT REFERENCES NHAN_VIEN(maNhanVien), ngayLamViec TEXT, caLam TEXT, nhiemVu TEXT NOT NULL, trangThai TEXT)");
+        db.execSQL("CREATE TABLE LICH_LAM_VIEC (maLich TEXT PRIMARY KEY, maNhanVien TEXT REFERENCES NHAN_VIEN(maNhanVien), ngayLamViec TEXT, caLam TEXT, nhiemVu TEXT NOT NULL)");
 
         // 3. Phần của My [cite: 49]
         db.execSQL("CREATE TABLE KHUYEN_MAI (maKhuyenMai TEXT PRIMARY KEY, loaiMa TEXT, giaTriGiam REAL, donToiThieu REAL, ngayKetThuc TEXT)");

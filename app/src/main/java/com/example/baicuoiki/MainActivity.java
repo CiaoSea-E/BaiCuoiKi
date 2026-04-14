@@ -27,10 +27,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initViews();
-        setupRecyclerView();
-        setupMenuClickEvents();
-        setupBottomNavigation();
+        try {
+            initViews();
+            setupRecyclerView();
+            setupMenuClickEvents();
+            setupBottomNavigation();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi khởi tạo giao diện!", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void initViews() {
@@ -43,44 +48,53 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         productList = new ArrayList<>();
-        // Demo data - Bạn có thể thay bằng dữ liệu từ DatabaseHelper sau này
+        // Demo data
         productList.add(new Product("P01", "Giày Conver_Chuck Taylor 1970s", 300140, "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-llt8l6x5z2f39c", "Mô tả giày", 10));
         productList.add(new Product("P02", "Giày Thể Thao C.V Taylor 1970s", 300140, "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lkx6n9o1y0u74a", "Mô tả giày", 5));
         productList.add(new Product("P03", "Giày_Adidas Samba đủ màu", 279500, "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lgx7v9v7v9v7v9", "Mô tả giày", 8));
         productList.add(new Product("P04", "Giày Thể Thao CV Taylor Black", 300140, "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lkx6n9o1y0u74a", "Mô tả giày", 0));
 
         productAdapter = new ProductAdapter(this, productList);
-        // Thiết kế Grid 2 cột
         rvProducts.setLayoutManager(new GridLayoutManager(this, 2));
         rvProducts.setAdapter(productAdapter);
         rvProducts.setNestedScrollingEnabled(false);
     }
 
     private void setupMenuClickEvents() {
-        btnSupplier.setOnClickListener(v ->
-                startActivity(new Intent(this, SupplierActivity.class)));
+        if (btnSupplier != null) {
+            btnSupplier.setOnClickListener(v -> {
+                startActivity(new Intent(MainActivity.this, SupplierActivity.class));
+            });
+        }
 
-        btnCustomer.setOnClickListener(v ->
-                startActivity(new Intent(this, CustomerActivity.class)));
+        if (btnSchedule != null) {
+            btnSchedule.setOnClickListener(v -> {
+                startActivity(new Intent(MainActivity.this, LichLamActivity.class));
+            });
+        }
 
-        btnSchedule.setOnClickListener(v ->
-                Toast.makeText(this, "Tính năng Lịch làm việc đang phát triển",
-                        Toast.LENGTH_SHORT).show());
+        if (btnCustomer != null) {
+            btnCustomer.setOnClickListener(v -> {
+                startActivity(new Intent(MainActivity.this, CustomerActivity.class));
+            });
+        }
     }
 
     private void setupBottomNavigation() {
-        bottomNavigation.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.nav_home) {
-                return true;
-            } else if (id == R.id.nav_cart) {
-                startActivity(new Intent(this, CartActivity.class));
-                return true;
-            } else if (id == R.id.nav_profile) {
-                Toast.makeText(this, "Tài khoản", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            return false;
-        });
+        if (bottomNavigation != null) {
+            bottomNavigation.setOnItemSelectedListener(item -> {
+                int id = item.getItemId();
+                if (id == R.id.nav_home) {
+                    return true;
+                } else if (id == R.id.nav_cart) {
+                    startActivity(new Intent(this, CartActivity.class));
+                    return true;
+                } else if (id == R.id.nav_profile) {
+                    Toast.makeText(this, "Tài khoản", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 }
