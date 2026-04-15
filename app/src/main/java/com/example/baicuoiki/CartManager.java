@@ -54,7 +54,6 @@ public class CartManager {
         }
     }
 
-    // Chỉ tính tổng tiền cho những sản phẩm được chọn
     public double getTotalCartPrice() {
         double total = 0;
         for (CartItem item : cartItems) {
@@ -69,8 +68,8 @@ public class CartManager {
         cartItems.clear();
     }
 
-    // Logic đặt hàng nâng cao: Chỉ đặt những sản phẩm được chọn
-    public String placeOrder(Context context, String customerId, String paymentMethod) {
+    // Hàm đặt hàng mới: Nhận tổng tiền cuối cùng (sau khi đã trừ voucher)
+    public String placeOrderWithTotal(Context context, String customerId, String paymentMethod, double finalTotal) {
         List<CartItem> selectedItems = new ArrayList<>();
         for (CartItem item : cartItems) {
             if (item.isSelected()) {
@@ -78,7 +77,7 @@ public class CartManager {
             }
         }
 
-        if (selectedItems.isEmpty()) return "Vui lòng chọn ít nhất một sản phẩm để đặt hàng";
+        if (selectedItems.isEmpty()) return "Vui lòng chọn sản phẩm";
 
         DatabaseHelper dbHelper = new DatabaseHelper(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -94,7 +93,7 @@ public class CartManager {
                     String name = cursor.getString(1);
                     if (item.getQuantity() > stock) {
                         cursor.close();
-                        return "Sản phẩm '" + name + "' không đủ hàng (Tồn: " + stock + ")";
+                        return "Sản phẩm '" + name + "' không đủ hàng";
                     }
                 }
                 cursor.close();
@@ -103,17 +102,16 @@ public class CartManager {
             String orderId = "HD" + System.currentTimeMillis();
             String date = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
 
-            // 2. Thêm vào bảng HOA_DON
+            // 2. Thêm vào bảng HOA_DON với tổng tiền ĐÃ GIẢM
             ContentValues orderValues = new ContentValues();
             orderValues.put("maHoadon", orderId);
             orderValues.put("maKhachHang", customerId);
             orderValues.put("ngayTaohoadon", date);
             orderValues.put("pThucThanhToan", paymentMethod);
-            orderValues.put("tongTienTT", getTotalCartPrice());
+            orderValues.put("tongTienTT", finalTotal); // Sử dụng tổng tiền đã trừ voucher
             orderValues.put("trangThaiDH", "Chờ xác nhận");
             
-            long result = db.insert("HOA_DON", null, orderValues);
-            if (result == -1) return "Lỗi khi tạo hóa đơn";
+            db.insert("HOA_DON", null, orderValues);
 
             // 3. Thêm CHI_TIET_HOA_DON và Cập nhật Tồn kho
             for (CartItem item : selectedItems) {
@@ -124,23 +122,22 @@ public class CartManager {
                 detailValues.put("giaBan", item.getPrice());
                 db.insert("CHI_TIET_HOA_DON", null, detailValues);
                 
-                // Cập nhật số lượng tồn kho
                 db.execSQL("UPDATE SAN_PHAM SET soLuongTon = soLuongTon - ? WHERE maSanpham = ?", 
                            new Object[]{item.getQuantity(), item.getProductId()});
             }
 
             db.setTransactionSuccessful();
-            
-            // Xóa những sản phẩm đã đặt khỏi giỏ hàng
             cartItems.removeIf(CartItem::isSelected);
-
             return "SUCCESS";
         } catch (Exception e) {
-            e.printStackTrace();
-            return "Lỗi hệ thống: " + e.getMessage();
+            return "Lỗi: " + e.getMessage();
         } finally {
             db.endTransaction();
             db.close();
         }
+    }
+
+    public String placeOrder(Context context, String customerId, String paymentMethod) {
+        return placeOrderWithTotal(context, customerId, paymentMethod, getTotalCartPrice());
     }
 }

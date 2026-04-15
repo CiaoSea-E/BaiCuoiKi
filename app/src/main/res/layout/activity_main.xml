@@ -53,7 +53,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Tìm kiếm sản phẩm..."
+                        android:text="Tìm kiếm món ăn..."
                         android:textColor="@color/text_gray"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -159,6 +159,61 @@
                             android:textColor="@color/text_black"
                             android:textSize="11sp" />
                     </LinearLayout>
+
+                    <!-- Thêm nút Khuyến mãi -->
+                    <LinearLayout
+                        android:id="@+id/btnPromotion"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_marginTop="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_home"
+                            app:tint="#FF9800" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Khuyến mãi"
+                            android:textColor="@color/text_black"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <!-- Thêm nút CSKH -->
+                    <LinearLayout
+                        android:id="@+id/btnCSKH"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_marginTop="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_headset" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Hỗ trợ CSKH"
+                            android:textColor="@color/text_black"
+                            android:textSize="11sp" />
+                    </LinearLayout>
                 </GridLayout>
             </androidx.cardview.widget.CardView>
 
@@ -179,7 +234,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="GỢI Ý HÔM NAY"
+                    android:text="ĐẶC SẢN 3 MIỀN"
                     android:textColor="@color/shopee_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />

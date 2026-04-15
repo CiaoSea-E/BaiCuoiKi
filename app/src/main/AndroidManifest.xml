@@ -14,6 +14,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BAICUOIKI">
 
+        <activity android:name=".OrderActivity" />
+        <activity android:name=".OrderDetailActivity" />
+        <activity android:name=".CheckoutActivity" android:exported="false" />
+
+        <!-- Activity từ dự án Khuyến mại -->
+        <activity
+            android:name="com.example.qlkhuyenmai.cskh.CSKHActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.example.qlkhuyenmai.KhuyenMaiMainActivity"
+            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

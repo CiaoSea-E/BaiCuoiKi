@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "BAI CUOI KI"
 include(":app")
- 

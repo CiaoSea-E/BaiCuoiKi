@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.androidApplication)
 }
 
 android {
@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId = "com.example.baicuoiki"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -45,22 +45,19 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // Thư viện Apache POI để xuất Excel
+    // Apache POI for Excel export
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")
-
-    // Quan trọng: Thêm log4j-api để tránh lỗi crash ngầm
     implementation("org.apache.logging.log4j:log4j-api:2.20.0")
     implementation("org.apache.logging.log4j:log4j-core:2.20.0")
-
-    // Hỗ trợ XML cho Android (POI dùng StAX)
     implementation("com.fasterxml.woodstox:woodstox-core:6.5.0")
 
-    // Thư viện Glide để load ảnh
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    // Glide for image loading
+    implementation(libs.glide)
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 }
