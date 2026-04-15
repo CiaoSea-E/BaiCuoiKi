@@ -52,7 +52,8 @@ public class LichLamActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lichlam);
+        // Sửa lỗi Ambiguous method call bằng cách sử dụng super
+        super.setContentView(R.layout.activity_lichlam);
 
         initViews();
 

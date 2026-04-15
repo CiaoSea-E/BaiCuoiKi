@@ -26,8 +26,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 1. Phần của Thùy
         db.execSQL("CREATE TABLE TAI_KHOAN (tenDangnhap TEXT PRIMARY KEY, matKhau TEXT NOT NULL, trangThai INTEGER, soLanDangNhapSai INTEGER DEFAULT 0, maOTP TEXT, thoiGianHetHanOTP TEXT)");
         db.execSQL("CREATE TABLE NHAN_VIEN (maNhanVien TEXT PRIMARY KEY, hoTen TEXT NOT NULL, sdt TEXT UNIQUE, email TEXT UNIQUE, cccd TEXT UNIQUE, ngaySinh TEXT, vaiTro TEXT, tenDangnhap TEXT REFERENCES TAI_KHOAN(tenDangnhap))");
-        db.execSQL("CREATE TABLE DANH_MUC_SP (maDanhMuc TEXT PRIMARY KEY, tenDanhMuc TEXT, trangThai INTEGER)");
-        db.execSQL("CREATE TABLE SAN_PHAM (maSanpham TEXT PRIMARY KEY, tenSanpham TEXT NOT NULL, maDanhMuc TEXT REFERENCES DANH_MUC_SP(maDanhMuc), hinhAnh TEXT, motaSanpham TEXT, donViTinh TEXT, giaDon REAL, soLuongTon INTEGER DEFAULT 0, hanSuDung TEXT, trangThai TEXT, maNCC TEXT REFERENCES NHA_CUNG_CAP(maNCC))");
+        
+        // Đã xóa bảng DANH_MUC_SP theo yêu cầu
+        db.execSQL("CREATE TABLE SAN_PHAM (" +
+                "maSanpham TEXT PRIMARY KEY, " +
+                "tenSanpham TEXT NOT NULL, " +
+                "hinhAnh TEXT, " +
+                "motaSanpham TEXT, " +
+                "donViTinh TEXT, " +
+                "giaDon REAL, " +
+                "soLuongTon INTEGER DEFAULT 0, " +
+                "hanSuDung TEXT, " +
+                "trangThai TEXT, " +
+                "maNCC TEXT REFERENCES NHA_CUNG_CAP(maNCC))");
 
         // 2. Phần của Đức Anh - Sử dụng hằng số cho LICH_LAM_VIEC
         db.execSQL("CREATE TABLE NHA_CUNG_CAP (maNCC TEXT PRIMARY KEY, tenNCC TEXT NOT NULL, sdt TEXT UNIQUE, email TEXT UNIQUE, diaChi TEXT, trangThai TEXT)");
@@ -68,7 +79,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LICH_LAM_VIEC);
         db.execSQL("DROP TABLE IF EXISTS NHA_CUNG_CAP");
         db.execSQL("DROP TABLE IF EXISTS SAN_PHAM");
-        db.execSQL("DROP TABLE IF EXISTS DANH_MUC_SP");
+        // Đã xóa DROP TABLE DANH_MUC_SP
         db.execSQL("DROP TABLE IF EXISTS NHAN_VIEN");
         db.execSQL("DROP TABLE IF EXISTS TAI_KHOAN");
         onCreate(db);

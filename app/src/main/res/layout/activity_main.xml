@@ -82,7 +82,7 @@
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:columnCount="3"
+                    android:columnCount="4"
                     android:padding="12dp">
 
                     <LinearLayout
@@ -156,6 +156,31 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="Lịch làm việc"
+                            android:textColor="@color/text_black"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btnProductManage"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_shopping_cart" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Sản phẩm"
                             android:textColor="@color/text_black"
                             android:textSize="11sp" />
                     </LinearLayout>

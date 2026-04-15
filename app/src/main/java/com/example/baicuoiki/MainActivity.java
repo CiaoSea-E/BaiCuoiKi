@@ -16,11 +16,13 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout btnSupplier, btnSchedule, btnCustomer;
+    private LinearLayout btnSupplier, btnSchedule, btnCustomer, btnProductManage;
     private BottomNavigationView bottomNavigation;
     private RecyclerView rvProducts;
     private ProductAdapter productAdapter;
     private List<Product> productList;
+    // Bỏ ProductDAO vì đã gộp logic vào Activity
+    // private ProductDAO productDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         try {
+            // productDAO = new ProductDAO(this);
             initViews();
             setupRecyclerView();
             setupMenuClickEvents();
@@ -38,22 +41,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadData();
+    }
+
+    private void loadData() {
+        // Mock data hoặc lấy từ DB trực tiếp nếu cần, tạm thời để trống để tránh crash do DAO bị xóa
+        // List<Product> newData = productDAO.getAllProducts();
+        // productList.clear();
+        // productList.addAll(newData);
+        // productAdapter.notifyDataSetChanged();
+    }
+
     private void initViews() {
         btnSupplier    = findViewById(R.id.btnSupplier);
         btnSchedule    = findViewById(R.id.btnSchedule);
         btnCustomer    = findViewById(R.id.btnCustomer);
+        btnProductManage = findViewById(R.id.btnProductManage);
         bottomNavigation = findViewById(R.id.bottomNavigation);
         rvProducts = findViewById(R.id.rvProducts);
     }
 
     private void setupRecyclerView() {
         productList = new ArrayList<>();
-        // Demo data
-        productList.add(new Product("P01", "Giày Conver_Chuck Taylor 1970s", 300140, "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-llt8l6x5z2f39c", "Mô tả giày", 10));
-        productList.add(new Product("P02", "Giày Thể Thao C.V Taylor 1970s", 300140, "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lkx6n9o1y0u74a", "Mô tả giày", 5));
-        productList.add(new Product("P03", "Giày_Adidas Samba đủ màu", 279500, "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lgx7v9v7v9v7v9", "Mô tả giày", 8));
-        productList.add(new Product("P04", "Giày Thể Thao CV Taylor Black", 300140, "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-lkx6n9o1y0u74a", "Mô tả giày", 0));
-
         productAdapter = new ProductAdapter(this, productList);
         rvProducts.setLayoutManager(new GridLayoutManager(this, 2));
         rvProducts.setAdapter(productAdapter);
@@ -76,6 +88,13 @@ public class MainActivity extends AppCompatActivity {
         if (btnCustomer != null) {
             btnCustomer.setOnClickListener(v -> {
                 startActivity(new Intent(MainActivity.this, CustomerActivity.class));
+            });
+        }
+
+        if (btnProductManage != null) {
+            btnProductManage.setOnClickListener(v -> {
+                // SỬA LỖI CRASH: Thay ProductManagementActivity.class thành ProductActivity.class
+                startActivity(new Intent(MainActivity.this, ProductActivity.class));
             });
         }
     }
