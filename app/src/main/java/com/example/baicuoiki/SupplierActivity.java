@@ -29,7 +29,7 @@ import java.util.List;
 
 import database.DatabaseHelper;
 
-public class  SupplierActivity extends AppCompatActivity {
+public class SupplierActivity extends AppCompatActivity {
 
     private ImageView btnBack, btnSearch;
     private EditText edtSearch;
@@ -40,6 +40,9 @@ public class  SupplierActivity extends AppCompatActivity {
     private SupplierAdapter adapter;
     private DatabaseHelper dbHelper;
 
+    // ------------------------------------------------------------------ //
+    //  onCreate                                                          //
+    // ------------------------------------------------------------------ //
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +58,9 @@ public class  SupplierActivity extends AppCompatActivity {
         loadDataFromDatabase();
     }
 
+    // ------------------------------------------------------------------ //
+    //  initViews                                                         //
+    // ------------------------------------------------------------------ //
     private void initViews() {
         btnBack = findViewById(R.id.btnBack);
         btnSearch = findViewById(R.id.btnSearch);
@@ -64,10 +70,14 @@ public class  SupplierActivity extends AppCompatActivity {
         fabAdd = findViewById(R.id.fabAdd);
     }
 
+    // ------------------------------------------------------------------ //
+    //  Load data                                                         //
+    // ------------------------------------------------------------------ //
     private void loadDataFromDatabase() {
         try {
             supplierList.clear();
             SQLiteDatabase db = dbHelper.getReadableDatabase();
+            // Lấy toàn bộ danh sách nhà cung cấp từ database
             Cursor cursor = db.rawQuery("SELECT * FROM NHA_CUNG_CAP", null);
             
             if (cursor != null && cursor.moveToFirst()) {
@@ -91,24 +101,41 @@ public class  SupplierActivity extends AppCompatActivity {
                 cursor.close();
             }
             
-            if (supplierList.size() == 0) {
-                tvEmpty.setVisibility(View.VISIBLE);
-                lvSupplier.setVisibility(View.GONE);
-            } else {
-                tvEmpty.setVisibility(View.GONE);
-                lvSupplier.setVisibility(View.VISIBLE);
-            }
+            // Cập nhật giao diện khi danh sách trống hoặc có dữ liệu
+            updateEmptyState(null);
             adapter.notifyDataSetChanged();
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi nạp dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
+    /** Cập nhật trạng thái hiển thị rỗng / có dữ liệu */
+    private void updateEmptyState(String keyword) {
+        if (supplierList.isEmpty()) {
+            tvEmpty.setVisibility(View.VISIBLE);
+            lvSupplier.setVisibility(View.GONE);
+            if (keyword != null) {
+                tvEmpty.setText("Không tìm thấy kết quả phù hợp với từ khóa: '" + keyword + "'");
+            } else {
+                tvEmpty.setText("Chưa có nhà cung cấp nào");
+            }
+        } else {
+            tvEmpty.setVisibility(View.GONE);
+            lvSupplier.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // ------------------------------------------------------------------ //
+    //  Events                                                            //
+    // ------------------------------------------------------------------ //
     private void setupEvents() {
+        // Sự kiện nút quay lại
         btnBack.setOnClickListener(v -> finish());
+        
+        // Sự kiện thêm mới
         fabAdd.setOnClickListener(v -> showAddSupplierDialog());
         
-        // Sự kiện Click bình thường: Chỉnh sửa
+        // Click bình thường: Hiển thị Dialog chỉnh sửa
         lvSupplier.setOnItemClickListener((parent, view, position, id) -> {
             if (position < supplierList.size()) {
                 Supplier selectedSupplier = supplierList.get(position);
@@ -116,11 +143,11 @@ public class  SupplierActivity extends AppCompatActivity {
             }
         });
 
-        // --- XỬ LÝ SỰ KIỆN NHẤN GIỮ LÂU (LONG CLICK) ĐỂ XÓA ---
+        // Nhấn giữ lâu (Long Click): Xác nhận xóa (Chỉ xóa nếu ngừng hợp tác)
         lvSupplier.setOnItemLongClickListener((parent, view, position, id) -> {
             Supplier selectedSupplier = supplierList.get(position);
             
-            // KIỂM TRA RÀNG BUỘC: Chỉ xóa nếu trạng thái là "Ngừng hợp tác"
+            // RÀNG BUỘC: Chỉ xóa nếu trạng thái là "Ngừng hợp tác"
             if (selectedSupplier.getTrangThai() != null && 
                 selectedSupplier.getTrangThai().equalsIgnoreCase("Ngừng hợp tác")) {
                 showDeleteConfirmDialog(selectedSupplier);
@@ -130,6 +157,7 @@ public class  SupplierActivity extends AppCompatActivity {
             return true; // Trả về true để không kích hoạt OnItemClick
         });
 
+        // Tìm kiếm nhà cung cấp theo nhiều tiêu chí
         btnSearch.setOnClickListener(v -> {
             String keyword = edtSearch.getText().toString().trim();
             if (keyword.isEmpty()) {
@@ -180,13 +208,14 @@ public class  SupplierActivity extends AppCompatActivity {
         });
     }
 
-    // --- HÀM HIỂN THỊ HỘP THOẠI XÁC NHẬN XÓA ---
+    // ------------------------------------------------------------------ //
+    //  Dialog: Xác nhận xóa                                              //
+    // ------------------------------------------------------------------ //
     private void showDeleteConfirmDialog(Supplier supplier) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Xác nhận xóa");
         builder.setMessage("Bạn có chắc chắn muốn xóa nhà cung cấp '" + supplier.getTenNCC() + "' không? Dữ liệu không thể khôi phục.");
         
-        // Nút XÓA (Khẳng định)
         builder.setPositiveButton("XÓA", (dialog, which) -> {
             try {
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -206,10 +235,13 @@ public class  SupplierActivity extends AppCompatActivity {
 
         // Nút HỦY (Phủ định)
         builder.setNegativeButton("HỦY", null);
-        
+
         builder.create().show();
     }
 
+    // ------------------------------------------------------------------ //
+    //  Dialog: Thêm nhà cung cấp                                         //
+    // ------------------------------------------------------------------ //
     private void showAddSupplierDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -238,6 +270,7 @@ public class  SupplierActivity extends AppCompatActivity {
             String email = edtEmail.getText().toString().trim();
             String diaChi = edtDiaChi.getText().toString().trim();
 
+            // RÀNG BUỘC NHẬP LIỆU
             if (ma.isEmpty() || ten.isEmpty() || sdt.isEmpty() || email.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đủ các trường bắt buộc (*) !", Toast.LENGTH_SHORT).show();
                 return;
@@ -269,6 +302,9 @@ public class  SupplierActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    // ------------------------------------------------------------------ //
+    //  Dialog: Chỉnh sửa nhà cung cấp                                    //
+    // ------------------------------------------------------------------ //
     private void showEditSupplierDialog(Supplier supplier) {
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -291,6 +327,7 @@ public class  SupplierActivity extends AppCompatActivity {
         Button btnHuy = dialog.findViewById(R.id.btnHuyEdit);
         Button btnCapNhat = dialog.findViewById(R.id.btnCapNhat);
 
+        // Đổ dữ liệu hiện tại vào Form
         edtMa.setText(supplier.getMaNCC());
         edtMa.setEnabled(false);
         edtTen.setText(supplier.getTenNCC());
@@ -335,7 +372,7 @@ public class  SupplierActivity extends AppCompatActivity {
                     dialog.dismiss();
                 }
             } catch (Exception e) {
-                Toast.makeText(this, "Lỗi: Số điện thoại hoặc Email đã bị trùng!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Lỗi cập nhật: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 

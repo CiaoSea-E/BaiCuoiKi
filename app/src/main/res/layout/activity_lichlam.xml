@@ -87,7 +87,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2"
+        android:weightSum="3"
         android:layout_margin="10dp">
 
         <Button
@@ -95,24 +95,36 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="XUẤT FILE"
+            android:text="XUẤT"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:backgroundTint="#9E9E9E"
-            android:layout_marginEnd="5dp"
-            android:padding="16dp" />
+            android:layout_marginEnd="2dp"
+            android:padding="12dp" />
+
+        <Button
+            android:id="@+id/btnBatchInsert"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ĐK NHANH"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:backgroundTint="#2196F3"
+            android:layout_marginHorizontal="2dp"
+            android:padding="12dp" />
 
         <Button
             android:id="@+id/btnThemLich"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="THÊM LỊCH MỚI"
+            android:text="THÊM MỚI"
             android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:backgroundTint="#EE4D2D"
-            android:layout_marginStart="5dp"
-            android:padding="16dp" />
+            android:layout_marginStart="2dp"
+            android:padding="12dp" />
 
     </LinearLayout>
 
