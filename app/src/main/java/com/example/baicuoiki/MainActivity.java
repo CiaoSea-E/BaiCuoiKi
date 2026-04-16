@@ -33,8 +33,8 @@ import database.DatabaseHelper;
 public class MainActivity extends AppCompatActivity {
 
     private LinearLayout btnSupplier, btnSchedule, btnCustomer, btnPromotion, btnProductManage, btnKhoKeToan, btnNhanVien;
-    private ImageView btnCSKH; // Đã đổi sang ImageView để khớp với XML
-    private GridLayout layoutAdminMenu;
+    private ImageView btnCSKH;
+    private LinearLayout layoutAdminMenuContainer;
     private BottomNavigationView bottomNavigation;
     private GridView gvProducts; 
     private ProductAdapter productAdapter;
@@ -71,30 +71,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (role.equalsIgnoreCase("customer")) {
-            if (btnSupplier != null) btnSupplier.setVisibility(View.GONE);
-            if (btnSchedule != null) btnSchedule.setVisibility(View.GONE);
-            if (btnProductManage != null) btnProductManage.setVisibility(View.GONE);
-            if (btnPromotion != null) btnPromotion.setVisibility(View.GONE);
-            if (btnKhoKeToan != null) btnKhoKeToan.setVisibility(View.GONE);
-            if (btnNhanVien != null) btnNhanVien.setVisibility(View.GONE);
+            // Khách hàng: Ẩn toàn bộ menu admin
+            if (layoutAdminMenuContainer != null) layoutAdminMenuContainer.setVisibility(View.GONE);
             
-            if (btnCustomer != null) btnCustomer.setVisibility(View.VISIBLE);
-
+            // Hiện icon Tài khoản ở Bottom Nav
             if (bottomNavigation != null) {
-                bottomNavigation.getMenu().findItem(R.id.nav_profile).setVisible(false);
+                bottomNavigation.getMenu().findItem(R.id.nav_user_info).setVisible(true);
             }
         } else {
-            if (layoutAdminMenu != null) layoutAdminMenu.setVisibility(View.VISIBLE);
-            if (btnSupplier != null) btnSupplier.setVisibility(View.VISIBLE);
-            if (btnSchedule != null) btnSchedule.setVisibility(View.VISIBLE);
-            if (btnProductManage != null) btnProductManage.setVisibility(View.VISIBLE);
-            if (btnPromotion != null) btnPromotion.setVisibility(View.VISIBLE);
-            if (btnKhoKeToan != null) btnKhoKeToan.setVisibility(View.VISIBLE);
-            if (btnNhanVien != null) btnNhanVien.setVisibility(View.VISIBLE);
-            if (btnCustomer != null) btnCustomer.setVisibility(View.VISIBLE);
+            // Admin: Hiện menu admin
+            if (layoutAdminMenuContainer != null) layoutAdminMenuContainer.setVisibility(View.VISIBLE);
             
+            // Ẩn icon Tài khoản ở Bottom Nav cho Admin vì đã có menu quản lý
             if (bottomNavigation != null) {
-                bottomNavigation.getMenu().findItem(R.id.nav_profile).setVisible(true);
+                bottomNavigation.getMenu().findItem(R.id.nav_user_info).setVisible(false);
             }
         }
     }
@@ -141,12 +131,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        layoutAdminMenu = findViewById(R.id.layoutAdminMenu);
+        layoutAdminMenuContainer = findViewById(R.id.layoutAdminMenuContainer);
         btnSupplier    = findViewById(R.id.btnSupplier);
         btnSchedule    = findViewById(R.id.btnSchedule);
         btnCustomer    = findViewById(R.id.btnCustomer);
         btnPromotion   = findViewById(R.id.btnPromotion);
-        btnCSKH        = findViewById(R.id.btnCSKH_Header); // Ánh xạ chính xác vào ImageView
+        btnCSKH        = findViewById(R.id.btnCSKH_Header);
         btnProductManage = findViewById(R.id.btnProductManage);
         btnKhoKeToan   = findViewById(R.id.btnKhoKeToan);
         btnNhanVien    = findViewById(R.id.btnNhanVien);
@@ -198,8 +188,8 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(this, OrderActivity.class));
                     return true;
                 }
-                if (id == R.id.nav_profile) {
-                    Toast.makeText(this, "Chức năng Tài khoản đang phát triển!", Toast.LENGTH_SHORT).show();
+                if (id == R.id.nav_user_info) {
+                    startActivity(new Intent(this, CustomerActivity.class));
                     return true;
                 }
                 return false;
