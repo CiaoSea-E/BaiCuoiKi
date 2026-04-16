@@ -1,4 +1,4 @@
-package com.example.baicuoiki;
+package com.example.baicuoiki.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -22,6 +22,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.baicuoiki.R;
+import com.example.baicuoiki.adapter.SupplierAdapter;
+import com.example.baicuoiki.model.Supplier;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;

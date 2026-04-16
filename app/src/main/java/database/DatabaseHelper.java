@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.baicuoiki.Customer;
+import com.example.baicuoiki.model.Customer;
 import com.example.kho_ketoan.models.BangLuong;
 import com.example.kho_ketoan.models.ChiTietPhieuKho;
 import com.example.kho_ketoan.models.PhieuKho;

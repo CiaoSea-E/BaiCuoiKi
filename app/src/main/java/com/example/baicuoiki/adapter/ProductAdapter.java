@@ -1,4 +1,4 @@
-package com.example.baicuoiki;
+package com.example.baicuoiki.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.baicuoiki.R;
+import com.example.baicuoiki.activity.CheckoutActivity;
+import com.example.baicuoiki.model.CartItem;
+import com.example.baicuoiki.model.CartManager;
+import com.example.baicuoiki.model.Product;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.text.DecimalFormat;

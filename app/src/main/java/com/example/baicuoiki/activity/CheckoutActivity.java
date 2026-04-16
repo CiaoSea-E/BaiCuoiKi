@@ -1,4 +1,4 @@
-package com.example.baicuoiki;
+package com.example.baicuoiki.activity;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,13 +17,16 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.baicuoiki.R;
+import com.example.baicuoiki.adapter.CartAdapter;
+import com.example.baicuoiki.model.CartItem;
 import com.example.qlkhuyenmai.KhuyenMai;
 import com.example.qlkhuyenmai.KhuyenMaiDAO;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.example.baicuoiki.model.CartManager;
 import database.DatabaseHelper;
 
 public class CheckoutActivity extends AppCompatActivity {

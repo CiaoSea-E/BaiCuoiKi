@@ -24,9 +24,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".OrderActivity" />
-        <activity android:name=".OrderDetailActivity" />
-        <activity android:name=".CheckoutActivity" android:exported="false" />
+        <activity android:name=".activity.OrderActivity" />
+        <activity android:name=".activity.OrderDetailActivity" />
+        <activity android:name=".activity.CheckoutActivity" android:exported="false" />
 
         <!-- Activity từ dự án Khuyến mại -->
         <activity
@@ -42,12 +42,6 @@
             android:exported="false" />
         <activity
             android:name="com.example.dangnhap.activities.NhanVienActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.dangnhap.activities.KhoActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.dangnhap.activities.SanPhamActivity"
             android:exported="false" />
 
         <!-- Module Kho & Kế Toán -->
@@ -74,19 +68,19 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".SupplierActivity"
+            android:name=".activity.SupplierActivity"
             android:exported="false" />
         <activity
-            android:name=".CustomerActivity"
+            android:name=".activity.CustomerActivity"
             android:exported="false" />
         <activity
-            android:name=".CartActivity"
+            android:name=".activity.CartActivity"
             android:exported="true" />
         <activity
-            android:name=".ProductActivity"
+            android:name=".activity.ProductActivity"
             android:exported="false" />
         <activity
-            android:name=".LichLamActivity"
+            android:name=".activity.LichLamActivity"
             android:exported="false" />
 
     </application>

@@ -1,4 +1,4 @@
-package com.example.baicuoiki;
+package com.example.baicuoiki.model;
 
 import java.io.Serializable;
 

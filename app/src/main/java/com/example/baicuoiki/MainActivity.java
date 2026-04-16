@@ -15,6 +15,14 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.baicuoiki.activity.CartActivity;
+import com.example.baicuoiki.activity.CustomerActivity;
+import com.example.baicuoiki.activity.LichLamActivity;
+import com.example.baicuoiki.activity.OrderActivity;
+import com.example.baicuoiki.activity.ProductActivity;
+import com.example.baicuoiki.activity.SupplierActivity;
+import com.example.baicuoiki.adapter.ProductAdapter;
+import com.example.baicuoiki.model.Product;
 import com.example.dangnhap.activities.NhanVienActivity;
 import com.example.kho_ketoan.activities.KhoKeToanMainActivity; // Import màn hình chính của module Kho
 import com.example.qlkhuyenmai.KhuyenMaiMainActivity;

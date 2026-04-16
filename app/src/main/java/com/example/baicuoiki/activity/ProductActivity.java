@@ -1,4 +1,4 @@
-package com.example.baicuoiki;
+package com.example.baicuoiki.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -25,6 +25,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.baicuoiki.R;
+import com.example.baicuoiki.model.Product;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
