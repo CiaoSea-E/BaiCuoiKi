@@ -17,7 +17,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "QuanLyHeThong.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // Hằng số cho bảng LICH_LAM_VIEC
     public static final String TABLE_LICH_LAM_VIEC = "LICH_LAM_VIEC";

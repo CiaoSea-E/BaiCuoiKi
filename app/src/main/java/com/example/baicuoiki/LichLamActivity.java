@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -359,14 +360,17 @@ public class LichLamActivity extends AppCompatActivity {
         }
 
         final TextView tvTieuDeDialog = dialog.findViewById(R.id.tvTieuDeDialog);
-        // ĐÃ XÓA DÒNG ÁNH XẠ edtMaLich
-        final TextInputEditText edtMaNhanVien = dialog.findViewById(R.id.edtMaNhanVien);
+        // Bước 2: Khai báo Spinner thay cho EditText
+        final Spinner spMaNhanVien = dialog.findViewById(R.id.spMaNhanVien);
         final TextView tvNgayLam = dialog.findViewById(R.id.tvNgayLam);
         final Button btnChonNgay = dialog.findViewById(R.id.btnChonNgay);
         final Spinner spCaLam = dialog.findViewById(R.id.spCaLam);
         final TextInputEditText edtNhiemVu = dialog.findViewById(R.id.edtNhiemVu);
         Button btnHuy = dialog.findViewById(R.id.btnHuy);
         Button btnLuu = dialog.findViewById(R.id.btnLuu);
+
+        // Nạp dữ liệu nhân viên vào Spinner
+        loadNhanVienToSpinner(spMaNhanVien);
 
         final String[] dsCa = new String[]{"Ca Sáng", "Ca Chiều", "Ca Tối"};
         spCaLam.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, dsCa));
@@ -378,32 +382,45 @@ public class LichLamActivity extends AppCompatActivity {
 
         btnHuy.setOnClickListener(v -> dialog.dismiss());
 
+        // Bước 3: Xử lý logic khi SỬA (Update)
         if (item != null) {
             tvTieuDeDialog.setText("CẬP NHẬT LỊCH LÀM VIỆC");
-            // ĐÃ XÓA DÒNG edtMaLich.setVisibility(View.GONE);
-            edtMaNhanVien.setText(item.getMaNhanVien());
             tvNgayLam.setText(item.getNgayLamViec());
             edtNhiemVu.setText(item.getNhiemVu());
 
-            String currentCa = item.getCaLam();
-            int caIndex = 0;
+            // Duyệt tìm và chọn đúng nhân viên trong Spinner
+            ArrayAdapter adapterNV = (ArrayAdapter) spMaNhanVien.getAdapter();
+            if (adapterNV != null) {
+                for (int i = 0; i < adapterNV.getCount(); i++) {
+                    String nvString = adapterNV.getItem(i).toString();
+                    if (nvString.startsWith(item.getMaNhanVien() + " - ")) {
+                        spMaNhanVien.setSelection(i);
+                        break;
+                    }
+                }
+            }
+
+            // Chọn ca làm
             for (int i = 0; i < dsCa.length; i++) {
-                if (dsCa[i].equalsIgnoreCase(currentCa)) {
-                    caIndex = i;
+                if (dsCa[i].equalsIgnoreCase(item.getCaLam())) {
+                    spCaLam.setSelection(i);
                     break;
                 }
             }
-            spCaLam.setSelection(caIndex);
         }
 
+        // Bước 4: Xử lý logic khi LƯU
         btnLuu.setOnClickListener(v -> {
-            String maNhanVien = edtMaNhanVien.getText() != null ? edtMaNhanVien.getText().toString().trim() : "";
-            String ngayLam = tvNgayLam.getText() != null ? tvNgayLam.getText().toString().trim() : "";
+            // Lấy và cắt chuỗi để lấy Mã NV
+            String selectedNV = spMaNhanVien.getSelectedItem() != null ? spMaNhanVien.getSelectedItem().toString() : "";
+            String maNhanVien = selectedNV.contains(" - ") ? selectedNV.split(" - ")[0] : selectedNV;
+            
+            String ngayLam = tvNgayLam.getText().toString().trim();
             String nhiemVu = edtNhiemVu.getText() != null ? edtNhiemVu.getText().toString().trim() : "";
             String caLam = spCaLam.getSelectedItem() != null ? spCaLam.getSelectedItem().toString() : "";
 
             if (maNhanVien.isEmpty()) {
-                Toast.makeText(this, "Mã nhân viên không được để trống!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Vui lòng chọn nhân viên!", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (ngayLam.isEmpty() || "Chọn ngày...".equalsIgnoreCase(ngayLam)) {

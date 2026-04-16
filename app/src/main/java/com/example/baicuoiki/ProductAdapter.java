@@ -51,7 +51,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 .error(R.drawable.ic_shopping_cart)
                 .into(holder.imgProduct);
 
-        // Mở Bottom Sheet khi nhấn Mua ngay
+        // --- SỰ KIỆN CLICK CHUYỂN MÀN HÌNH CHI TIẾT ---
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_DATA", product);
+            context.startActivity(intent);
+        });
+        
+        // Nút Mua ngay mở Bottom Sheet
         holder.btnBuyNow.setOnClickListener(v -> showBuyBottomSheet(product));
 
         holder.btnAddToCart.setOnClickListener(v -> {
@@ -100,9 +107,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         btnConfirmBuy.setOnClickListener(v -> {
             CartItem item = new CartItem(product.getId(), product.getName(), product.getPrice(), quantity, product.getImage());
-            // Sử dụng buyNow thay vì addToCart để tránh cộng dồn số lượng khi nhấn mua ngay nhiều lần
             CartManager.getInstance().buyNow(item);
-
             bottomSheetDialog.dismiss();
             context.startActivity(new Intent(context, CheckoutActivity.class));
         });

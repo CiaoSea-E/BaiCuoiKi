@@ -43,13 +43,6 @@
         <activity
             android:name="com.example.dangnhap.activities.NhanVienActivity"
             android:exported="false" />
-        <activity
-            android:name="com.example.dangnhap.activities.KhoActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.dangnhap.activities.SanPhamActivity"
-            android:exported="false" />
-
         <!-- Module Kho & Kế Toán -->
         <activity
             android:name="com.example.kho_ketoan.activities.KhoKeToanMainActivity"
@@ -87,6 +80,10 @@
             android:exported="false" />
         <activity
             android:name=".LichLamActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ProductDetailActivity"
             android:exported="false" />
 
     </application>
