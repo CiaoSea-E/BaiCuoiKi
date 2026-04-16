@@ -8,11 +8,21 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo_app"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo_app"
         android:supportsRtl="true"
         android:theme="@style/Theme.BAICUOIKI">
+
+        <!-- Màn hình Đăng Nhập - CHẠY ĐẦU TIÊN -->
+        <activity
+            android:name="com.example.dangnhap.activities.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity android:name=".OrderActivity" />
         <activity android:name=".OrderDetailActivity" />
@@ -22,34 +32,56 @@
         <activity
             android:name="com.example.qlkhuyenmai.cskh.CSKHActivity"
             android:exported="false" />
-
         <activity
             android:name="com.example.qlkhuyenmai.KhuyenMaiMainActivity"
             android:exported="false" />
 
+        <!-- Module Đăng Nhập -->
+        <activity
+            android:name="com.example.dangnhap.activities.AdminActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.dangnhap.activities.NhanVienActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.dangnhap.activities.KhoActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.dangnhap.activities.SanPhamActivity"
+            android:exported="false" />
+
+        <!-- Module Kho & Kế Toán -->
+        <activity
+            android:name="com.example.kho_ketoan.activities.KhoKeToanMainActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.kho_ketoan.activities.PhieuKhoActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.kho_ketoan.activities.AddEditPhieuKhoActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.kho_ketoan.activities.ChiTietPhieuKhoActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.kho_ketoan.activities.BangLuongActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.example.kho_ketoan.activities.ThongKeActivity"
+            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
+            android:exported="false" />
         <activity
             android:name=".SupplierActivity"
             android:exported="false" />
-
         <activity
             android:name=".CustomerActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
             android:name=".CartActivity"
             android:exported="true" />
-
         <activity
             android:name=".ProductActivity"
             android:exported="false" />

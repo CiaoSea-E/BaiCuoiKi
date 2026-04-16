@@ -27,13 +27,33 @@ public class CartManager {
         return instance;
     }
 
+    // Dùng cho nút "Thêm vào giỏ hàng" - Cộng dồn số lượng
     public void addToCart(CartItem newItem) {
         for (CartItem item : cartItems) {
             if (item.getProductId().equals(newItem.getProductId())) {
                 item.setQuantity(item.getQuantity() + newItem.getQuantity());
+                item.setSelected(newItem.isSelected());
                 return;
             }
         }
+        cartItems.add(newItem);
+    }
+
+    // Dùng cho nút "Mua ngay" - Ghi đè số lượng để tránh cộng dồn khi quay lại nhiều lần
+    public void buyNow(CartItem newItem) {
+        // Bỏ chọn tất cả các sản phẩm khác
+        for (CartItem ci : cartItems) {
+            ci.setSelected(false);
+        }
+
+        for (CartItem item : cartItems) {
+            if (item.getProductId().equals(newItem.getProductId())) {
+                item.setQuantity(newItem.getQuantity()); // Ghi đè số lượng
+                item.setSelected(true);
+                return;
+            }
+        }
+        newItem.setSelected(true);
         cartItems.add(newItem);
     }
 
@@ -68,7 +88,6 @@ public class CartManager {
         cartItems.clear();
     }
 
-    // Hàm đặt hàng mới: Nhận tổng tiền cuối cùng (sau khi đã trừ voucher)
     public String placeOrderWithTotal(Context context, String customerId, String paymentMethod, double finalTotal) {
         List<CartItem> selectedItems = new ArrayList<>();
         for (CartItem item : cartItems) {
@@ -84,7 +103,6 @@ public class CartManager {
         db.beginTransaction();
 
         try {
-            // 1. Kiểm tra tồn kho
             for (CartItem item : selectedItems) {
                 Cursor cursor = db.rawQuery("SELECT soLuongTon, tenSanpham FROM SAN_PHAM WHERE maSanpham = ?", 
                                           new String[]{item.getProductId()});
@@ -102,18 +120,16 @@ public class CartManager {
             String orderId = "HD" + System.currentTimeMillis();
             String date = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
 
-            // 2. Thêm vào bảng HOA_DON với tổng tiền ĐÃ GIẢM
             ContentValues orderValues = new ContentValues();
             orderValues.put("maHoadon", orderId);
             orderValues.put("maKhachHang", customerId);
             orderValues.put("ngayTaohoadon", date);
             orderValues.put("pThucThanhToan", paymentMethod);
-            orderValues.put("tongTienTT", finalTotal); // Sử dụng tổng tiền đã trừ voucher
+            orderValues.put("tongTienTT", finalTotal);
             orderValues.put("trangThaiDH", "Chờ xác nhận");
             
             db.insert("HOA_DON", null, orderValues);
 
-            // 3. Thêm CHI_TIET_HOA_DON và Cập nhật Tồn kho
             for (CartItem item : selectedItems) {
                 ContentValues detailValues = new ContentValues();
                 detailValues.put("maHoadon", orderId);

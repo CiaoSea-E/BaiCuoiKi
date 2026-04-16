@@ -69,7 +69,7 @@
                             android:id="@+id/tvCustomerName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Minh Tân (+84) 969 068 750"
+                            android:text="Thông tin nhận hàng"
                             android:textColor="@color/text_black"
                             android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Số 9, Ngách 50/21 Yên Xá\nXã Tân Triều, Huyện Thanh Trì, Hà Nội"
+                            android:text=""
                             android:textColor="@color/text_gray"
                             android:textSize="13sp" />
                     </LinearLayout>

@@ -99,14 +99,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         btnClose.setOnClickListener(v -> bottomSheetDialog.dismiss());
 
         btnConfirmBuy.setOnClickListener(v -> {
-            // Chỉ chọn duy nhất sản phẩm này để thanh toán ngay
-            for (CartItem ci : CartManager.getInstance().getCartItems()) {
-                ci.setSelected(false);
-            }
-
             CartItem item = new CartItem(product.getId(), product.getName(), product.getPrice(), quantity, product.getImage());
-            item.setSelected(true);
-            CartManager.getInstance().addToCart(item);
+            // Sử dụng buyNow thay vì addToCart để tránh cộng dồn số lượng khi nhấn mua ngay nhiều lần
+            CartManager.getInstance().buyNow(item);
 
             bottomSheetDialog.dismiss();
             context.startActivity(new Intent(context, CheckoutActivity.class));

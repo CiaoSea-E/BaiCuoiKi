@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.dangnhap.activities.NhanVienActivity;
+import com.example.kho_ketoan.activities.KhoKeToanMainActivity; // Import màn hình chính của module Kho
 import com.example.qlkhuyenmai.KhuyenMaiMainActivity;
 import com.example.qlkhuyenmai.cskh.CSKHActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -26,7 +28,7 @@ import database.DatabaseHelper;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout btnSupplier, btnSchedule, btnCustomer, btnPromotion, btnCSKH, btnProductManage;
+    private LinearLayout btnSupplier, btnSchedule, btnCustomer, btnPromotion, btnCSKH, btnProductManage, btnKhoKeToan;
     private BottomNavigationView bottomNavigation;
     private RecyclerView rvProducts;
     private ProductAdapter productAdapter;
@@ -35,9 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Giải quyết vấn đề đổi màu khi cắm sạc (Dark Mode)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadData(""); // Load toàn bộ khi vào lại
+        loadData("");
     }
 
     private void loadData(String keyword) {
@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             if (keyword.isEmpty()) {
                 cursor = db.rawQuery("SELECT * FROM SAN_PHAM", null);
             } else {
-                // Tìm kiếm gần đúng (LIKE) theo tên sản phẩm
                 cursor = db.rawQuery("SELECT * FROM SAN_PHAM WHERE tenSanpham LIKE ?", new String[]{"%" + keyword + "%"});
             }
             
@@ -86,13 +85,11 @@ public class MainActivity extends AppCompatActivity {
                     p.setExpiryDate(cursor.getString(7));
                     p.setStatus(cursor.getString(8));
                     p.setSupplierId(cursor.getString(9));
-                    
                     productList.add(p);
                 } while (cursor.moveToNext());
             }
             cursor.close();
             db.close();
-            
             productAdapter.notifyDataSetChanged();
         }
     }
@@ -102,8 +99,9 @@ public class MainActivity extends AppCompatActivity {
         btnSchedule    = findViewById(R.id.btnSchedule);
         btnCustomer    = findViewById(R.id.btnCustomer);
         btnPromotion   = findViewById(R.id.btnPromotion);
-        btnCSKH        = findViewById(R.id.btnCSKH);
+        btnCSKH        = findViewById(R.id.btnCSKH_Header);
         btnProductManage = findViewById(R.id.btnProductManage);
+        btnKhoKeToan   = findViewById(R.id.btnKhoKeToan); // Ánh xạ nút Kho mới
         bottomNavigation = findViewById(R.id.bottomNavigation);
         rvProducts = findViewById(R.id.rvProducts);
         edtSearchHome = findViewById(R.id.edtSearchHome);
@@ -114,13 +112,10 @@ public class MainActivity extends AppCompatActivity {
             edtSearchHome.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    // Tìm kiếm ngay khi người dùng gõ phím
                     loadData(s.toString().trim());
                 }
-
                 @Override
                 public void afterTextChanged(Editable s) {}
             });
@@ -136,28 +131,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupMenuClickEvents() {
-        if (btnSupplier != null) {
-            btnSupplier.setOnClickListener(v -> startActivity(new Intent(this, SupplierActivity.class)));
-        }
-
-        if (btnSchedule != null) {
-            btnSchedule.setOnClickListener(v -> startActivity(new Intent(this, LichLamActivity.class)));
-        }
-
-        if (btnCustomer != null) {
-            btnCustomer.setOnClickListener(v -> startActivity(new Intent(this, CustomerActivity.class)));
-        }
-
-        if (btnPromotion != null) {
-            btnPromotion.setOnClickListener(v -> startActivity(new Intent(this, KhuyenMaiMainActivity.class)));
-        }
-
-        if (btnCSKH != null) {
-            btnCSKH.setOnClickListener(v -> startActivity(new Intent(this, CSKHActivity.class)));
-        }
-
-        if (btnProductManage != null) {
-            btnProductManage.setOnClickListener(v -> startActivity(new Intent(this, ProductActivity.class)));
+        if (btnSupplier != null) btnSupplier.setOnClickListener(v -> startActivity(new Intent(this, SupplierActivity.class)));
+        if (btnSchedule != null) btnSchedule.setOnClickListener(v -> startActivity(new Intent(this, LichLamActivity.class)));
+        if (btnCustomer != null) btnCustomer.setOnClickListener(v -> startActivity(new Intent(this, CustomerActivity.class)));
+        if (btnPromotion != null) btnPromotion.setOnClickListener(v -> startActivity(new Intent(this, KhuyenMaiMainActivity.class)));
+        if (btnCSKH != null) btnCSKH.setOnClickListener(v -> startActivity(new Intent(this, CSKHActivity.class)));
+        if (btnProductManage != null) btnProductManage.setOnClickListener(v -> startActivity(new Intent(this, ProductActivity.class)));
+        
+        // Sự kiện cho nút Kho & Kế toán
+        if (btnKhoKeToan != null) {
+            btnKhoKeToan.setOnClickListener(v -> startActivity(new Intent(this, KhoKeToanMainActivity.class)));
         }
     }
 
@@ -174,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(this, OrderActivity.class));
                     return true;
                 } else if (id == R.id.nav_profile) {
-                    Toast.makeText(this, "Tài khoản", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, NhanVienActivity.class));
                     return true;
                 }
                 return false;
