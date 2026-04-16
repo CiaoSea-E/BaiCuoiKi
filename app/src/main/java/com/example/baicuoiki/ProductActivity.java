@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,6 +26,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -32,6 +36,7 @@ import database.DatabaseHelper;
 /**
  * Senior Android Developer - Refactored Product Management
  * Tối ưu hiển thị chi tiết sản phẩm và JOIN Tên nhà cung cấp.
+ * Hỗ trợ chọn ảnh từ thư viện và lưu vào bộ nhớ trong.
  */
 public class ProductActivity extends AppCompatActivity {
 
@@ -44,6 +49,12 @@ public class ProductActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private ArrayList<Product> productList;
     private ProductAdapter adapter;
+
+    // Biến tạm để lưu đường dẫn ảnh đang chọn trong dialog
+    private String currentSelectedImageUri = "";
+    private ImageView imgPreviewInDialog;
+
+    private static final int PICK_IMAGE_REQUEST = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +113,6 @@ public class ProductActivity extends AppCompatActivity {
         productList.clear();
         Cursor cursor = null;
         try {
-            // Câu lệnh SQL JOIN lấy tên nhà cung cấp
             String sql = "SELECT sp.*, ncc.tenNCC FROM SAN_PHAM sp " +
                          "LEFT JOIN NHA_CUNG_CAP ncc ON sp.maNCC = ncc.maNCC";
             
@@ -125,7 +135,7 @@ public class ProductActivity extends AppCompatActivity {
                     p.setStock(cursor.getInt(6));
                     p.setExpiryDate(cursor.getString(7));
                     p.setSupplierId(cursor.getString(9));
-                    p.setSupplierName(cursor.getString(10)); // Lấy tenNCC từ cột thứ 11
+                    p.setSupplierName(cursor.getString(10));
                     productList.add(p);
                 }
                 cursor.close();
@@ -150,14 +160,19 @@ public class ProductActivity extends AppCompatActivity {
         TextView tvTitle = dialog.findViewById(R.id.tvTitle);
         EditText edtId = dialog.findViewById(R.id.edtId);
         EditText edtName = dialog.findViewById(R.id.edtName);
-        EditText edtImage = dialog.findViewById(R.id.edtImage);
         EditText edtDesc = dialog.findViewById(R.id.edtDescription);
         EditText edtUnit = dialog.findViewById(R.id.edtUnit);
         EditText edtPrice = dialog.findViewById(R.id.edtPrice);
         EditText edtStock = dialog.findViewById(R.id.edtStock);
         EditText edtExpiry = dialog.findViewById(R.id.edtExpiry);
+        
+        imgPreviewInDialog = dialog.findViewById(R.id.imgPreview);
+        Button btnChooseImage = dialog.findViewById(R.id.btnChooseImage);
+        
         Button btnSave = dialog.findViewById(R.id.btnSave);
         Button btnDelete = dialog.findViewById(R.id.btnDelete);
+
+        currentSelectedImageUri = ""; // Reset khi mở dialog
 
         edtExpiry.setFocusable(false);
         edtExpiry.setClickable(true);
@@ -204,12 +219,16 @@ public class ProductActivity extends AppCompatActivity {
             edtId.setText(product.getId());
             edtId.setEnabled(false);
             edtName.setText(product.getName());
-            edtImage.setText(product.getImage());
             edtDesc.setText(product.getDescription());
             edtUnit.setText(product.getUnit());
             edtPrice.setText(String.valueOf(product.getPrice()));
             edtStock.setText(String.valueOf(product.getStock()));
             edtExpiry.setText(product.getExpiryDate());
+            
+            currentSelectedImageUri = product.getImage();
+            if (currentSelectedImageUri != null && !currentSelectedImageUri.isEmpty()) {
+                Glide.with(this).load(currentSelectedImageUri).into(imgPreviewInDialog);
+            }
 
             if (product.getSupplierId() != null) {
                 int position = supplierIds.indexOf(product.getSupplierId());
@@ -218,6 +237,12 @@ public class ProductActivity extends AppCompatActivity {
         } else {
             tvTitle.setText("THÊM SẢN PHẨM MỚI");
         }
+
+        btnChooseImage.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        });
 
         btnSave.setOnClickListener(v -> {
             try {
@@ -232,7 +257,7 @@ public class ProductActivity extends AppCompatActivity {
                 ContentValues values = new ContentValues();
                 values.put("maSanpham", id);
                 values.put("tenSanpham", name);
-                values.put("hinhAnh", edtImage.getText().toString().trim());
+                values.put("hinhAnh", currentSelectedImageUri); // Dùng path đã chọn
                 values.put("motaSanpham", edtDesc.getText().toString().trim());
                 values.put("donViTinh", edtUnit.getText().toString().trim());
                 values.put("giaDon", Double.parseDouble(edtPrice.getText().toString().isEmpty() ? "0" : edtPrice.getText().toString()));
@@ -242,8 +267,6 @@ public class ProductActivity extends AppCompatActivity {
                 int selectedPosition = spnSupplier.getSelectedItemPosition();
                 if (selectedPosition >= 0) {
                     values.put("maNCC", supplierIds.get(selectedPosition));
-                } else {
-                    values.put("maNCC", ""); 
                 }
 
                 if (isEdit) {
@@ -263,6 +286,43 @@ public class ProductActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            if (imageUri != null) {
+                String savedPath = saveImageToInternalStorage(imageUri);
+                if (savedPath != null) {
+                    currentSelectedImageUri = savedPath;
+                    if (imgPreviewInDialog != null) {
+                        Glide.with(this).load(savedPath).into(imgPreviewInDialog);
+                    }
+                }
+            }
+        }
+    }
+
+    private String saveImageToInternalStorage(Uri uri) {
+        try {
+            String fileName = "prod_" + System.currentTimeMillis() + ".jpg";
+            InputStream is = getContentResolver().openInputStream(uri);
+            FileOutputStream fos = openFileOutput(fileName, Context.MODE_PRIVATE);
+            
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, read);
+            }
+            is.close();
+            fos.close();
+            return getFilesDir() + "/" + fileName;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void confirmDelete(Product p) {

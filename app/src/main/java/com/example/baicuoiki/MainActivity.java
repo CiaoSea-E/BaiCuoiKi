@@ -1,11 +1,17 @@
 package com.example.baicuoiki;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,6 +22,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
+import database.DatabaseHelper;
+
 public class MainActivity extends AppCompatActivity {
 
     private LinearLayout btnSupplier, btnSchedule, btnCustomer, btnPromotion, btnCSKH, btnProductManage;
@@ -23,15 +31,20 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvProducts;
     private ProductAdapter productAdapter;
     private List<Product> productList;
+    private EditText edtSearchHome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Giải quyết vấn đề đổi màu khi cắm sạc (Dark Mode)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         try {
             initViews();
             setupRecyclerView();
+            setupSearch();
             setupMenuClickEvents();
             setupBottomNavigation();
         } catch (Exception e) {
@@ -43,13 +56,43 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadData();
+        loadData(""); // Load toàn bộ khi vào lại
     }
 
-    private void loadData() {
-        // Danh sách trống như yêu cầu, bạn sẽ insert từ app sau
+    private void loadData(String keyword) {
         if (productList != null) {
             productList.clear();
+            DatabaseHelper dbHelper = new DatabaseHelper(this);
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            
+            Cursor cursor;
+            if (keyword.isEmpty()) {
+                cursor = db.rawQuery("SELECT * FROM SAN_PHAM", null);
+            } else {
+                // Tìm kiếm gần đúng (LIKE) theo tên sản phẩm
+                cursor = db.rawQuery("SELECT * FROM SAN_PHAM WHERE tenSanpham LIKE ?", new String[]{"%" + keyword + "%"});
+            }
+            
+            if (cursor.moveToFirst()) {
+                do {
+                    Product p = new Product();
+                    p.setId(cursor.getString(0));
+                    p.setName(cursor.getString(1));
+                    p.setImage(cursor.getString(2));
+                    p.setDescription(cursor.getString(3));
+                    p.setUnit(cursor.getString(4));
+                    p.setPrice(cursor.getDouble(5));
+                    p.setStock(cursor.getInt(6));
+                    p.setExpiryDate(cursor.getString(7));
+                    p.setStatus(cursor.getString(8));
+                    p.setSupplierId(cursor.getString(9));
+                    
+                    productList.add(p);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            db.close();
+            
             productAdapter.notifyDataSetChanged();
         }
     }
@@ -63,6 +106,25 @@ public class MainActivity extends AppCompatActivity {
         btnProductManage = findViewById(R.id.btnProductManage);
         bottomNavigation = findViewById(R.id.bottomNavigation);
         rvProducts = findViewById(R.id.rvProducts);
+        edtSearchHome = findViewById(R.id.edtSearchHome);
+    }
+
+    private void setupSearch() {
+        if (edtSearchHome != null) {
+            edtSearchHome.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    // Tìm kiếm ngay khi người dùng gõ phím
+                    loadData(s.toString().trim());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        }
     }
 
     private void setupRecyclerView() {

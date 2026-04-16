@@ -49,12 +49,17 @@
                         android:src="@drawable/ic_search"
                         app:tint="@color/shopee_primary" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <EditText
+                        android:id="@+id/edtSearchHome"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_marginStart="8dp"
-                        android:text="Tìm kiếm sản phẩm..."
-                        android:textColor="@color/text_gray"
+                        android:background="@null"
+                        android:hint="Tìm kiếm sản phẩm..."
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/text_black"
                         android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -64,6 +69,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="56dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -279,13 +285,18 @@
                 android:padding="4dp"
                 android:nestedScrollingEnabled="false" />
 
+            <!-- Khoảng trắng thêm ở cuối để kéo thoải mái -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_gravity="bottom"
         android:background="@color/white"
         app:itemIconTint="@color/nav_item_color"
