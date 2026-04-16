@@ -58,32 +58,18 @@ public class LoginActivity extends AppCompatActivity {
             TaiKhoan tk = tkDAO.checkLogin(username, password);
 
             if (tk != null) {
-                // 1. Lưu quyền vào SharedPreferences
+                // 1. Lưu quyền và tên người dùng vào SharedPreferences
                 SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
                 
                 String role = username.equalsIgnoreCase("admin") ? "admin" : "customer";
                 editor.putString("ROLE", role);
+                editor.putString("USERNAME", username);
                 editor.apply();
 
-                // 2. Phân luồng chuyển màn hình
-                Intent intent;
-                if (role.equals("admin")) {
-                    // Admin vào màn hình Quản lý
-                    intent = new Intent(LoginActivity.this, MainActivity.class);
-                } else {
-                    // Khách hàng vào màn hình CustomerMainActivity (Giả định class đã tạo)
-                    // Lưu ý: Nếu bạn chưa tạo CustomerMainActivity, hãy tạo file này trước để tránh lỗi compile
-                    try {
-                        Class<?> targetClass = Class.forName("com.example.baicuoiki.CustomerMainActivity");
-                        intent = new Intent(LoginActivity.this, targetClass);
-                    } catch (ClassNotFoundException e) {
-                        Toast.makeText(this, "Màn hình Khách hàng đang phát triển!", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                }
-
+                // 2. TẤT CẢ ĐỀU VÀO MainActivity (Phân quyền sẽ xử lý bên trong đó)
                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             } else {

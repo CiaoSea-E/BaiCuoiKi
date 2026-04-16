@@ -5,13 +5,11 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -19,7 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
+public class ProductAdapter extends BaseAdapter {
 
     private Context context;
     private List<Product> productList;
@@ -30,15 +28,37 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.productList = productList;
     }
 
-    @NonNull
     @Override
-    public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
-        return new ProductViewHolder(view);
+    public int getCount() {
+        return productList.size();
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
+    public Object getItem(int position) {
+        return productList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
+        if (convertView == null) {
+            convertView = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
+            holder = new ViewHolder();
+            holder.imgProduct = convertView.findViewById(R.id.imgProduct);
+            holder.tvName = convertView.findViewById(R.id.tvProductName);
+            holder.tvPrice = convertView.findViewById(R.id.tvProductPrice);
+            holder.btnBuyNow = convertView.findViewById(R.id.btnBuyNow);
+            holder.btnAddToCart = convertView.findViewById(R.id.btnAddToCart);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+
         Product product = productList.get(position);
         holder.tvName.setText(product.getName());
         
@@ -51,14 +71,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 .error(R.drawable.ic_shopping_cart)
                 .into(holder.imgProduct);
 
-        // --- SỰ KIỆN CLICK CHUYỂN MÀN HÌNH CHI TIẾT ---
-        holder.itemView.setOnClickListener(v -> {
+        // Chuyển màn hình chi tiết khi click vào item
+        convertView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);
             intent.putExtra("PRODUCT_DATA", product);
             context.startActivity(intent);
         });
-        
-        // Nút Mua ngay mở Bottom Sheet
+
+        // Mở Bottom Sheet khi nhấn Mua ngay
         holder.btnBuyNow.setOnClickListener(v -> showBuyBottomSheet(product));
 
         holder.btnAddToCart.setOnClickListener(v -> {
@@ -66,6 +86,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             CartManager.getInstance().addToCart(item);
             Toast.makeText(context, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
         });
+
+        return convertView;
+    }
+
+    private static class ViewHolder {
+        ImageView imgProduct;
+        TextView tvName, tvPrice;
+        Button btnBuyNow, btnAddToCart;
     }
 
     private void showBuyBottomSheet(Product product) {
@@ -82,7 +110,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         ImageView btnClose = view.findViewById(R.id.btnCloseSheet);
         Button btnConfirmBuy = view.findViewById(R.id.btnConfirmBuySheet);
 
-        // Load data
         tvNameSheet.setText(product.getName());
         DecimalFormat formatter = new DecimalFormat("###,###,###");
         tvPriceSheet.setText(formatter.format(product.getPrice()) + "đ");
@@ -113,25 +140,5 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         });
 
         bottomSheetDialog.show();
-    }
-
-    @Override
-    public int getItemCount() {
-        return productList.size();
-    }
-
-    public static class ProductViewHolder extends RecyclerView.ViewHolder {
-        ImageView imgProduct;
-        TextView tvName, tvPrice;
-        Button btnBuyNow, btnAddToCart;
-
-        public ProductViewHolder(@NonNull View itemView) {
-            super(itemView);
-            imgProduct = itemView.findViewById(R.id.imgProduct);
-            tvName = itemView.findViewById(R.id.tvProductName);
-            tvPrice = itemView.findViewById(R.id.tvProductPrice);
-            btnBuyNow = itemView.findViewById(R.id.btnBuyNow);
-            btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
-        }
     }
 }
