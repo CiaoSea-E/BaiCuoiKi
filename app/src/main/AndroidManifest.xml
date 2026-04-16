@@ -52,5 +52,9 @@
         <activity android:name="com.example.kho_ketoan.activities.BangLuongActivity" />
         <activity android:name="com.example.kho_ketoan.activities.ThongKeActivity" />
 
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+
     </application>
 </manifest>
