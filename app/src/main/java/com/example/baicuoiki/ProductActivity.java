@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,6 +26,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -32,6 +36,7 @@ import database.DatabaseHelper;
 /**
  * Senior Android Developer - Refactored Product Management
  * Tối ưu hiển thị chi tiết sản phẩm và JOIN Tên nhà cung cấp.
+ * Hỗ trợ chọn ảnh từ thư viện và lưu vào bộ nhớ trong.
  */
 public class ProductActivity extends AppCompatActivity {
 
@@ -44,6 +49,12 @@ public class ProductActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private ArrayList<Product> productList;
     private ProductAdapter adapter;
+
+    // Biến tạm để lưu đường dẫn ảnh đang chọn trong dialog
+    private String currentSelectedImageUri = "";
+    private ImageView imgPreviewInDialog;
+
+    private static final int PICK_IMAGE_REQUEST = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +151,7 @@ public class ProductActivity extends AppCompatActivity {
                     p.setSupplierName(cursor.getString(idxSuppName));
                     productList.add(p);
                 }
+                cursor.close();
             }
 
             if (adapter == null) {
@@ -171,8 +183,14 @@ public class ProductActivity extends AppCompatActivity {
         EditText edtPrice = dialog.findViewById(R.id.edtPrice);
         EditText edtStock = dialog.findViewById(R.id.edtStock);
         EditText edtExpiry = dialog.findViewById(R.id.edtExpiry);
+
+        imgPreviewInDialog = dialog.findViewById(R.id.imgPreview);
+        Button btnChooseImage = dialog.findViewById(R.id.btnChooseImage);
+
         Button btnSave = dialog.findViewById(R.id.btnSave);
         Button btnDelete = dialog.findViewById(R.id.btnDelete);
+
+        currentSelectedImageUri = ""; // Reset khi mở dialog
 
         edtExpiry.setFocusable(false);
         edtExpiry.setClickable(true);
@@ -227,6 +245,11 @@ public class ProductActivity extends AppCompatActivity {
             edtStock.setText(String.valueOf(product.getStock()));
             edtExpiry.setText(product.getExpiryDate());
 
+            currentSelectedImageUri = product.getImage();
+            if (currentSelectedImageUri != null && !currentSelectedImageUri.isEmpty()) {
+                Glide.with(this).load(currentSelectedImageUri).into(imgPreviewInDialog);
+            }
+
             if (product.getSupplierId() != null) {
                 int position = supplierIds.indexOf(product.getSupplierId());
                 if (position >= 0) spnSupplier.setSelection(position);
@@ -234,6 +257,12 @@ public class ProductActivity extends AppCompatActivity {
         } else {
             tvTitle.setText("THÊM SẢN PHẨM MỚI");
         }
+
+        btnChooseImage.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        });
 
         btnSave.setOnClickListener(v -> {
             try {
@@ -312,6 +341,43 @@ public class ProductActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            if (imageUri != null) {
+                String savedPath = saveImageToInternalStorage(imageUri);
+                if (savedPath != null) {
+                    currentSelectedImageUri = savedPath;
+                    if (imgPreviewInDialog != null) {
+                        Glide.with(this).load(savedPath).into(imgPreviewInDialog);
+                    }
+                }
+            }
+        }
+    }
+
+    private String saveImageToInternalStorage(Uri uri) {
+        try {
+            String fileName = "prod_" + System.currentTimeMillis() + ".jpg";
+            InputStream is = getContentResolver().openInputStream(uri);
+            FileOutputStream fos = openFileOutput(fileName, Context.MODE_PRIVATE);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, read);
+            }
+            is.close();
+            fos.close();
+            return getFilesDir() + "/" + fileName;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void confirmDelete(Product p) {
@@ -393,6 +459,5 @@ public class ProductActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (db != null && db.isOpen()) db.close();
-        if (dbHelper != null) dbHelper.close();
     }
 }
