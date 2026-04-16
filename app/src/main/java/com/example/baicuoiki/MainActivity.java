@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadData();
+        // SỬA LỖI: Truyền chuỗi rỗng để load toàn bộ dữ liệu khi quay lại màn hình
+        loadData("");
     }
 
     private void loadData(String keyword) {
