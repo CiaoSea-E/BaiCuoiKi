@@ -7,11 +7,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "QuanLyHeThong.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Hằng số cho bảng LICH_LAM_VIEC
     public static final String TABLE_LICH_LAM_VIEC = "LICH_LAM_VIEC";
-    public static final String COLUMN_MA_LICH = "maLich";
+    public static final String COLUMN_ID = "id";
     public static final String COLUMN_MA_NV = "maNhanVien";
     public static final String COLUMN_NGAY_LAM = "ngayLamViec";
     public static final String COLUMN_CA_LAM = "caLam";
@@ -44,7 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE NHA_CUNG_CAP (maNCC TEXT PRIMARY KEY, tenNCC TEXT NOT NULL, sdt TEXT UNIQUE, email TEXT UNIQUE, diaChi TEXT, trangThai TEXT)");
 
         String sqlLichLam = "CREATE TABLE " + TABLE_LICH_LAM_VIEC + " ("
-                + COLUMN_MA_LICH + " TEXT PRIMARY KEY, "
+                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_MA_NV + " TEXT REFERENCES NHAN_VIEN(maNhanVien), "
                 + COLUMN_NGAY_LAM + " TEXT, "
                 + COLUMN_CA_LAM + " TEXT, "

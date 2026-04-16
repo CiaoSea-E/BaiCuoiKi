@@ -50,34 +50,50 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         
         holder.cbSelect.setChecked(item.isSelected());
 
+        // Nếu là màn hình Checkout (listener == null), ẩn checkbox và các nút sửa số lượng để tránh lỗi
+        if (listener == null) {
+            holder.cbSelect.setVisibility(View.GONE);
+            holder.btnPlus.setVisibility(View.GONE);
+            holder.btnMinus.setVisibility(View.GONE);
+            holder.btnRemove.setVisibility(View.GONE);
+            // Thêm text "x1", "x2" để hiển thị số lượng thay vì nút bấm
+            holder.tvQuantity.setText("x" + item.getQuantity());
+        } else {
+            holder.cbSelect.setVisibility(View.VISIBLE);
+            holder.btnPlus.setVisibility(View.VISIBLE);
+            holder.btnMinus.setVisibility(View.VISIBLE);
+            holder.btnRemove.setVisibility(View.VISIBLE);
+        }
+
         Glide.with(context)
                 .load(item.getImage())
                 .placeholder(R.drawable.ic_shopping_cart)
                 .error(R.drawable.ic_shopping_cart)
                 .into(holder.imgProduct);
 
-        // Sự kiện tích chọn sản phẩm
         holder.cbSelect.setOnClickListener(v -> {
             item.setSelected(holder.cbSelect.isChecked());
-            listener.onChange();
+            if (listener != null) listener.onChange();
         });
 
         holder.btnPlus.setOnClickListener(v -> {
             item.incrementQuantity();
             notifyItemChanged(position);
-            listener.onChange();
+            if (listener != null) listener.onChange();
         });
 
         holder.btnMinus.setOnClickListener(v -> {
-            item.decrementQuantity();
-            notifyItemChanged(position);
-            listener.onChange();
+            if (item.getQuantity() > 1) {
+                item.decrementQuantity();
+                notifyItemChanged(position);
+                if (listener != null) listener.onChange();
+            }
         });
 
         holder.btnRemove.setOnClickListener(v -> {
             CartManager.getInstance().removeItem(item.getProductId());
             notifyDataSetChanged();
-            listener.onChange();
+            if (listener != null) listener.onChange();
         });
     }
 

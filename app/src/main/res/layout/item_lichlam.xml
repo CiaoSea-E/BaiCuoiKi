@@ -12,11 +12,11 @@
         android:layout_marginBottom="8dp">
 
         <TextView
-            android:id="@+id/tvMaLich"
+            android:id="@+id/tvIdLich"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:text="LICH001"
+            android:text="ID: 1"
             android:textColor="#EE4D2D"
             android:textSize="18sp"
             android:textStyle="bold" />

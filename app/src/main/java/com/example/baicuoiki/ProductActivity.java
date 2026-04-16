@@ -102,10 +102,11 @@ public class ProductActivity extends AppCompatActivity {
         productList.clear();
         Cursor cursor = null;
         try {
-            // Câu lệnh SQL JOIN lấy tên nhà cung cấp
-            String sql = "SELECT sp.*, ncc.tenNCC FROM SAN_PHAM sp " +
-                         "LEFT JOIN NHA_CUNG_CAP ncc ON sp.maNCC = ncc.maNCC";
-            
+            String sql = "SELECT sp.maSanpham, sp.tenSanpham, sp.hinhAnh, sp.motaSanpham, " +
+                    "sp.donViTinh, sp.giaDon, sp.soLuongTon, sp.hanSuDung, sp.maNCC, " +
+                    "ncc.tenNCC AS tenNhaCungCap " +
+                    "FROM SAN_PHAM sp LEFT JOIN NHA_CUNG_CAP ncc ON sp.maNCC = ncc.maNCC";
+
             if (keyword.isEmpty()) {
                 cursor = db.rawQuery(sql, null);
             } else {
@@ -114,21 +115,31 @@ public class ProductActivity extends AppCompatActivity {
             }
 
             if (cursor != null) {
+                int idxId = cursor.getColumnIndexOrThrow("maSanpham");
+                int idxName = cursor.getColumnIndexOrThrow("tenSanpham");
+                int idxImage = cursor.getColumnIndexOrThrow("hinhAnh");
+                int idxDesc = cursor.getColumnIndexOrThrow("motaSanpham");
+                int idxUnit = cursor.getColumnIndexOrThrow("donViTinh");
+                int idxPrice = cursor.getColumnIndexOrThrow("giaDon");
+                int idxStock = cursor.getColumnIndexOrThrow("soLuongTon");
+                int idxExpiry = cursor.getColumnIndexOrThrow("hanSuDung");
+                int idxSuppId = cursor.getColumnIndexOrThrow("maNCC");
+                int idxSuppName = cursor.getColumnIndexOrThrow("tenNhaCungCap");
+
                 while (cursor.moveToNext()) {
                     Product p = new Product();
-                    p.setId(cursor.getString(0));
-                    p.setName(cursor.getString(1));
-                    p.setImage(cursor.getString(2));
-                    p.setDescription(cursor.getString(3));
-                    p.setUnit(cursor.getString(4));
-                    p.setPrice(cursor.getDouble(5));
-                    p.setStock(cursor.getInt(6));
-                    p.setExpiryDate(cursor.getString(7));
-                    p.setSupplierId(cursor.getString(9));
-                    p.setSupplierName(cursor.getString(10)); // Lấy tenNCC từ cột thứ 11
+                    p.setId(cursor.getString(idxId));
+                    p.setName(cursor.getString(idxName));
+                    p.setImage(cursor.getString(idxImage));
+                    p.setDescription(cursor.getString(idxDesc));
+                    p.setUnit(cursor.getString(idxUnit));
+                    p.setPrice(cursor.getDouble(idxPrice));
+                    p.setStock(cursor.getInt(idxStock));
+                    p.setExpiryDate(cursor.getString(idxExpiry));
+                    p.setSupplierId(cursor.getString(idxSuppId));
+                    p.setSupplierName(cursor.getString(idxSuppName));
                     productList.add(p);
                 }
-                cursor.close();
             }
 
             if (adapter == null) {
@@ -139,6 +150,10 @@ public class ProductActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Toast.makeText(this, "Lỗi truy vấn: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
         }
     }
 
@@ -197,6 +212,7 @@ public class ProductActivity extends AppCompatActivity {
         spnSupplier.setAdapter(spinnerAdapter);
 
         boolean isEdit = (product != null);
+        final String originalId = isEdit ? product.getId() : null;
         btnDelete.setVisibility(View.GONE);
 
         if (isEdit) {
@@ -229,30 +245,63 @@ public class ProductActivity extends AppCompatActivity {
                     return;
                 }
 
+                double price = 0;
+                int stock = 0;
+                try {
+                    String strPrice = edtPrice.getText().toString().trim();
+                    if (!strPrice.isEmpty()) {
+                        price = Double.parseDouble(strPrice);
+                    }
+
+                    String strStock = edtStock.getText().toString().trim();
+                    if (!strStock.isEmpty()) {
+                        stock = Integer.parseInt(strStock);
+                    }
+                } catch (NumberFormatException ex) {
+                    Toast.makeText(this, "Giá và số lượng phải là số hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (price < 0 || stock < 0) {
+                    Toast.makeText(this, "Giá và số lượng không được âm!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 ContentValues values = new ContentValues();
                 values.put("maSanpham", id);
                 values.put("tenSanpham", name);
                 values.put("hinhAnh", edtImage.getText().toString().trim());
                 values.put("motaSanpham", edtDesc.getText().toString().trim());
                 values.put("donViTinh", edtUnit.getText().toString().trim());
-                values.put("giaDon", Double.parseDouble(edtPrice.getText().toString().isEmpty() ? "0" : edtPrice.getText().toString()));
-                values.put("soLuongTon", Integer.parseInt(edtStock.getText().toString().isEmpty() ? "0" : edtStock.getText().toString()));
+                values.put("giaDon", price);
+                values.put("soLuongTon", stock);
                 values.put("hanSuDung", edtExpiry.getText().toString().trim());
 
                 int selectedPosition = spnSupplier.getSelectedItemPosition();
-                if (selectedPosition >= 0) {
+                if (selectedPosition >= 0 && selectedPosition < supplierIds.size()) {
                     values.put("maNCC", supplierIds.get(selectedPosition));
                 } else {
-                    values.put("maNCC", ""); 
+                    values.putNull("maNCC");
                 }
 
                 if (isEdit) {
-                    db.update("SAN_PHAM", values, "maSanpham=?", new String[]{id});
-                    Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                    if (originalId == null || originalId.isEmpty()) {
+                        Toast.makeText(this, "Không xác định được mã sản phẩm gốc để cập nhật!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    int rows = db.update("SAN_PHAM", values, "maSanpham=?", new String[]{originalId});
+                    if (rows > 0) {
+                        Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Không tìm thấy sản phẩm để cập nhật!", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     long res = db.insert("SAN_PHAM", null, values);
-                    if (res != -1) Toast.makeText(this, "Thêm mới thành công!", Toast.LENGTH_SHORT).show();
-                    else Toast.makeText(this, "Thêm thất bại!", Toast.LENGTH_SHORT).show();
+                    if (res != -1) {
+                        Toast.makeText(this, "Thêm mới thành công!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Thêm thất bại!", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 dialog.dismiss();
@@ -344,5 +393,6 @@ public class ProductActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (db != null && db.isOpen()) db.close();
+        if (dbHelper != null) dbHelper.close();
     }
 }

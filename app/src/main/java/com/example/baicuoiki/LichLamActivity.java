@@ -82,7 +82,7 @@ public class LichLamActivity extends AppCompatActivity {
 
         // Xuất file Excel
         btnExport.setOnClickListener(v -> {
-            String[] headers = {"Mã Lịch", "Mã NV", "Ngày Làm Việc", "Ca Làm", "Nhiệm Vụ"};
+            String[] headers = {"ID", "Mã NV", "Ngày Làm Việc", "Ca Làm", "Nhiệm Vụ"};
             ExcelHelper.exportToExcel(
                     LichLamActivity.this,
                     "LichLamViec_Export",
@@ -90,7 +90,7 @@ public class LichLamActivity extends AppCompatActivity {
                     headers,
                     listLichLam,
                     (row, lich) -> {
-                        row.createCell(0).setCellValue(lich.getMaLich());
+                        row.createCell(0).setCellValue(lich.getId());
                         row.createCell(1).setCellValue(lich.getMaNhanVien());
                         row.createCell(2).setCellValue(lich.getNgayLamViec());
                         row.createCell(3).setCellValue(lich.getCaLam());
@@ -194,14 +194,14 @@ public class LichLamActivity extends AppCompatActivity {
     /** Nạp danh sách nhân viên từ database vào Spinner */
     private void loadNhanVienToSpinner(Spinner sp) {
         List<String> dsNV = new ArrayList<>();
+        Cursor c = null;
         try {
             SQLiteDatabase db = dbHelper.getReadableDatabase();
-            Cursor c = db.rawQuery("SELECT maNhanVien, hoTen FROM NHAN_VIEN", null);
-            if (c != null && c.getCount() > 0) {
-                while (c.moveToNext()) {
+            c = db.rawQuery("SELECT maNhanVien, hoTen FROM NHAN_VIEN", null);
+            if (c != null && c.moveToFirst()) {
+                do {
                     dsNV.add(c.getString(0) + " - " + c.getString(1));
-                }
-                c.close();
+                } while (c.moveToNext());
             } else {
                 dsNV.add("NV01 - Đức Anh");
                 dsNV.add("NV02 - My");
@@ -210,6 +210,10 @@ public class LichLamActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             dsNV.add("NV01 - Đức Anh");
+        } finally {
+            if (c != null && !c.isClosed()) {
+                c.close();
+            }
         }
         ArrayAdapter<String> adapterNV = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, dsNV);
         sp.setAdapter(adapterNV);
@@ -239,18 +243,16 @@ public class LichLamActivity extends AppCompatActivity {
                             String ngay = sdf.format(cal.getTime());
 
                             // Bước 3: Sinh mã lịch (maNV_Ngay_Index)
-                            String maLich = maNV + "_" + ngay.replace("/", "") + "_" + i;
+                            // String maLich = maNV + "_" + ngay.replace("/", "") + "_" + i;
 
                             // Bước 4: Đóng gói dữ liệu vào ContentValues
                             ContentValues cv = new ContentValues();
-                            cv.put(DatabaseHelper.COLUMN_MA_LICH, maLich);
                             cv.put(DatabaseHelper.COLUMN_MA_NV, maNV);
                             cv.put(DatabaseHelper.COLUMN_NGAY_LAM, ngay);
                             cv.put(DatabaseHelper.COLUMN_CA_LAM, dsCa[i - 1]);
                             cv.put(DatabaseHelper.COLUMN_NHIEM_VU, nhiemVu);
 
-                            // Chèn dữ liệu (Nếu trùng mã lịch sẽ Ghi đè - REPLACE)
-                            db.insertWithOnConflict(DatabaseHelper.TABLE_LICH_LAM_VIEC, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+                            db.insert(DatabaseHelper.TABLE_LICH_LAM_VIEC, null, cv);
                             count++;
                         }
                     }
@@ -271,20 +273,29 @@ public class LichLamActivity extends AppCompatActivity {
      * Hàm dùng chung để đổ dữ liệu từ Cursor vào danh sách hiển thị
      */
     private void doDuLieuVaoDanhSach(Cursor cursor) {
-        if (cursor != null && cursor.moveToFirst()) {
-            int idxMa = cursor.getColumnIndex(DatabaseHelper.COLUMN_MA_LICH);
-            int idxMaNV = cursor.getColumnIndex(DatabaseHelper.COLUMN_MA_NV);
-            int idxNgay = cursor.getColumnIndex(DatabaseHelper.COLUMN_NGAY_LAM);
-            int idxCa = cursor.getColumnIndex(DatabaseHelper.COLUMN_CA_LAM);
-            int idxNhiemVu = cursor.getColumnIndex(DatabaseHelper.COLUMN_NHIEM_VU);
-            do {
-                listLichLam.add(new LichLamViec(
-                        cursor.getString(idxMa), cursor.getString(idxMaNV),
-                        cursor.getString(idxNgay), cursor.getString(idxCa),
-                        cursor.getString(idxNhiemVu)
-                ));
-            } while (cursor.moveToNext());
-            cursor.close();
+        if (cursor == null) {
+            return;
+        }
+
+        try {
+            if (cursor.moveToFirst()) {
+                int idxId = cursor.getColumnIndex(DatabaseHelper.COLUMN_ID);
+                int idxMaNV = cursor.getColumnIndex(DatabaseHelper.COLUMN_MA_NV);
+                int idxNgay = cursor.getColumnIndex(DatabaseHelper.COLUMN_NGAY_LAM);
+                int idxCa = cursor.getColumnIndex(DatabaseHelper.COLUMN_CA_LAM);
+                int idxNhiemVu = cursor.getColumnIndex(DatabaseHelper.COLUMN_NHIEM_VU);
+                do {
+                    listLichLam.add(new LichLamViec(
+                            cursor.getLong(idxId), cursor.getString(idxMaNV),
+                            cursor.getString(idxNgay), cursor.getString(idxCa),
+                            cursor.getString(idxNhiemVu)
+                    ));
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
         }
     }
 
@@ -312,14 +323,17 @@ public class LichLamActivity extends AppCompatActivity {
             String param = "%" + keyword + "%";
             String sql = "SELECT * FROM " + DatabaseHelper.TABLE_LICH_LAM_VIEC
                     + " WHERE " + DatabaseHelper.COLUMN_MA_NV + " LIKE ?"
-                    + " OR " + DatabaseHelper.COLUMN_NGAY_LAM + " LIKE ?"
-                    + " OR " + DatabaseHelper.COLUMN_MA_LICH + " LIKE ?";
-            Cursor cursor = db.rawQuery(sql, new String[]{param, param, param});
-            
+                    + " OR " + DatabaseHelper.COLUMN_NGAY_LAM + " LIKE ?";
+            Cursor cursor = db.rawQuery(sql, new String[]{param, param});
+
             doDuLieuVaoDanhSach(cursor);
 
+            tvKhongCoDuLieu.setVisibility(listLichLam.isEmpty() ? View.VISIBLE : View.GONE);
+            lvLichLam.setVisibility(listLichLam.isEmpty() ? View.GONE : View.VISIBLE);
             adapter.notifyDataSetChanged();
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi tìm kiếm: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showDeleteConfirmDialog(LichLamViec item) {
@@ -328,7 +342,7 @@ public class LichLamActivity extends AppCompatActivity {
                 .setMessage("Bạn có chắc chắn muốn xóa lịch làm việc của '" + item.getMaNhanVien() + "' không?")
                 .setPositiveButton("XÓA", (dialog, which) -> {
                     dbHelper.getWritableDatabase().delete(DatabaseHelper.TABLE_LICH_LAM_VIEC,
-                            DatabaseHelper.COLUMN_MA_LICH + "=?", new String[]{item.getMaLich()});
+                            DatabaseHelper.COLUMN_ID + "=?", new String[]{String.valueOf(item.getId())});
                     loadDataFromDatabase();
                 })
                 .setNegativeButton("HỦY", null).show();
@@ -345,7 +359,7 @@ public class LichLamActivity extends AppCompatActivity {
         }
 
         final TextView tvTieuDeDialog = dialog.findViewById(R.id.tvTieuDeDialog);
-        final TextInputEditText edtMaLich = dialog.findViewById(R.id.edtMaLich);
+        // ĐÃ XÓA DÒNG ÁNH XẠ edtMaLich
         final TextInputEditText edtMaNhanVien = dialog.findViewById(R.id.edtMaNhanVien);
         final TextView tvNgayLam = dialog.findViewById(R.id.tvNgayLam);
         final Button btnChonNgay = dialog.findViewById(R.id.btnChonNgay);
@@ -354,7 +368,8 @@ public class LichLamActivity extends AppCompatActivity {
         Button btnHuy = dialog.findViewById(R.id.btnHuy);
         Button btnLuu = dialog.findViewById(R.id.btnLuu);
 
-        spCaLam.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, new String[]{"Ca Sáng", "Ca Chiều", "Ca Tối"}));
+        final String[] dsCa = new String[]{"Ca Sáng", "Ca Chiều", "Ca Tối"};
+        spCaLam.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, dsCa));
 
         btnChonNgay.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
@@ -365,26 +380,65 @@ public class LichLamActivity extends AppCompatActivity {
 
         if (item != null) {
             tvTieuDeDialog.setText("CẬP NHẬT LỊCH LÀM VIỆC");
-            edtMaLich.setText(item.getMaLich());
-            edtMaLich.setEnabled(false);
+            // ĐÃ XÓA DÒNG edtMaLich.setVisibility(View.GONE);
             edtMaNhanVien.setText(item.getMaNhanVien());
             tvNgayLam.setText(item.getNgayLamViec());
             edtNhiemVu.setText(item.getNhiemVu());
+
+            String currentCa = item.getCaLam();
+            int caIndex = 0;
+            for (int i = 0; i < dsCa.length; i++) {
+                if (dsCa[i].equalsIgnoreCase(currentCa)) {
+                    caIndex = i;
+                    break;
+                }
+            }
+            spCaLam.setSelection(caIndex);
         }
 
         btnLuu.setOnClickListener(v -> {
+            String maNhanVien = edtMaNhanVien.getText() != null ? edtMaNhanVien.getText().toString().trim() : "";
+            String ngayLam = tvNgayLam.getText() != null ? tvNgayLam.getText().toString().trim() : "";
+            String nhiemVu = edtNhiemVu.getText() != null ? edtNhiemVu.getText().toString().trim() : "";
+            String caLam = spCaLam.getSelectedItem() != null ? spCaLam.getSelectedItem().toString() : "";
+
+            if (maNhanVien.isEmpty()) {
+                Toast.makeText(this, "Mã nhân viên không được để trống!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (ngayLam.isEmpty() || "Chọn ngày...".equalsIgnoreCase(ngayLam)) {
+                Toast.makeText(this, "Vui lòng chọn ngày làm việc!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (nhiemVu.isEmpty()) {
+                Toast.makeText(this, "Nhiệm vụ không được để trống!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             ContentValues values = new ContentValues();
-            values.put(DatabaseHelper.COLUMN_MA_NV, edtMaNhanVien.getText().toString());
-            values.put(DatabaseHelper.COLUMN_NGAY_LAM, tvNgayLam.getText().toString());
-            values.put(DatabaseHelper.COLUMN_CA_LAM, spCaLam.getSelectedItem().toString());
-            values.put(DatabaseHelper.COLUMN_NHIEM_VU, edtNhiemVu.getText().toString());
+            values.put(DatabaseHelper.COLUMN_MA_NV, maNhanVien);
+            values.put(DatabaseHelper.COLUMN_NGAY_LAM, ngayLam);
+            values.put(DatabaseHelper.COLUMN_CA_LAM, caLam);
+            values.put(DatabaseHelper.COLUMN_NHIEM_VU, nhiemVu);
 
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             if (item == null) {
-                values.put(DatabaseHelper.COLUMN_MA_LICH, edtMaLich.getText().toString());
-                db.insert(DatabaseHelper.TABLE_LICH_LAM_VIEC, null, values);
+                long rowId = db.insert(DatabaseHelper.TABLE_LICH_LAM_VIEC, null, values);
+                if (rowId == -1) {
+                    Toast.makeText(this, "Thêm lịch làm việc thất bại!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             } else {
-                db.update(DatabaseHelper.TABLE_LICH_LAM_VIEC, values, DatabaseHelper.COLUMN_MA_LICH + "=?", new String[]{item.getMaLich()});
+                int rows = db.update(
+                        DatabaseHelper.TABLE_LICH_LAM_VIEC,
+                        values,
+                        DatabaseHelper.COLUMN_ID + "=?",
+                        new String[]{String.valueOf(item.getId())}
+                );
+                if (rows <= 0) {
+                    Toast.makeText(this, "Cập nhật lịch làm việc thất bại!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
             loadDataFromDatabase();
             dialog.dismiss();

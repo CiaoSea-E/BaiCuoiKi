@@ -52,20 +52,31 @@ public class LichLamViecAdapter extends ArrayAdapter<LichLamViec> {
 
         if (lich != null) {
             // 3. Ánh xạ các TextView dựa trên convertView vừa được nạp
-            TextView tvMaLich = convertView.findViewById(R.id.tvMaLich);
+            // Đã đổi ID từ tvMaLich thành tvIdLich cho khớp với item_lichlam.xml
+            TextView tvIdLich = convertView.findViewById(R.id.tvIdLich);
             TextView tvNgayLam = convertView.findViewById(R.id.tvNgayLamViec);
             TextView tvMaNhanVien = convertView.findViewById(R.id.tvMaNhanVien);
             TextView tvCaLam = convertView.findViewById(R.id.tvCaLam);
             TextView tvNhiemVu = convertView.findViewById(R.id.tvNhiemVu);
 
             // 4. Sử dụng setText() để đổ dữ liệu từ đối tượng vào giao diện
-            tvMaLich.setText(lich.getMaLich());
-            tvNgayLam.setText(lich.getNgayLamViec());
+            if (tvIdLich != null) {
+                tvIdLich.setText("ID: " + lich.getId());
+            }
+            if (tvNgayLam != null) {
+                tvNgayLam.setText(lich.getNgayLamViec());
+            }
 
             // Có thể nối chuỗi thêm text phụ họa để hiển thị giống thiết kế Card đã làm
-            tvMaNhanVien.setText("Nhân viên: " + lich.getMaNhanVien());
-            tvCaLam.setText("Ca: " + lich.getCaLam());
-            tvNhiemVu.setText("Nhiệm vụ: " + lich.getNhiemVu());
+            if (tvMaNhanVien != null) {
+                tvMaNhanVien.setText("Nhân viên: " + lich.getMaNhanVien());
+            }
+            if (tvCaLam != null) {
+                tvCaLam.setText("Ca: " + lich.getCaLam());
+            }
+            if (tvNhiemVu != null) {
+                tvNhiemVu.setText("Nhiệm vụ: " + lich.getNhiemVu());
+            }
         }
 
         // 5. Trả về convertView đã mang đầy đủ dữ liệu để hiển thị lên màn hình

@@ -1,5 +1,6 @@
 package com.example.baicuoiki;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +39,16 @@ public class CartActivity extends AppCompatActivity {
         setupClickEvents();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cập nhật lại UI khi quay về từ màn hình thanh toán
+        updateUI();
+        if (cartAdapter != null) {
+            cartAdapter.notifyDataSetChanged();
+        }
+    }
+
     private void initViews() {
         btnBack = findViewById(R.id.btnBack);
         btnShopNow = findViewById(R.id.btnShopNow);
@@ -66,7 +77,6 @@ public class CartActivity extends AppCompatActivity {
             layoutCartContent.setVisibility(View.VISIBLE);
             layoutBottom.setVisibility(View.VISIBLE);
             
-            // Cập nhật tổng tiền của các sản phẩm ĐÃ CHỌN
             double total = CartManager.getInstance().getTotalCartPrice();
             DecimalFormat formatter = new DecimalFormat("###,###,###");
             tvTotalCartPrice.setText(formatter.format(total) + "đ");
@@ -78,14 +88,21 @@ public class CartActivity extends AppCompatActivity {
         btnShopNow.setOnClickListener(v -> finish());
 
         btnCheckout.setOnClickListener(v -> {
-            // Thực hiện đặt hàng cho các sản phẩm đã chọn
-            String result = CartManager.getInstance().placeOrder(this, "KH001", "Thanh toán khi nhận hàng");
-            if ("SUCCESS".equals(result)) {
-                Toast.makeText(this, "Đặt hàng thành công!", Toast.LENGTH_LONG).show();
-                updateUI();
-                cartAdapter.notifyDataSetChanged();
+            // Kiểm tra xem có sản phẩm nào được chọn không
+            boolean hasSelection = false;
+            for (CartItem item : cartItems) {
+                if (item.isSelected()) {
+                    hasSelection = true;
+                    break;
+                }
+            }
+
+            if (hasSelection) {
+                // Chuyển sang màn hình Thanh toán (Checkout)
+                Intent intent = new Intent(CartActivity.this, CheckoutActivity.class);
+                startActivity(intent);
             } else {
-                Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Vui lòng chọn ít nhất một sản phẩm", Toast.LENGTH_SHORT).show();
             }
         });
     }
