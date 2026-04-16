@@ -276,6 +276,18 @@ public class SupplierActivity extends AppCompatActivity {
                 return;
             }
 
+            // Bắt lỗi Số điện thoại: Bắt đầu bằng '0' và có đúng 10 chữ số
+            if (!sdt.matches("^0\\d{9}$")) {
+                Toast.makeText(this, "Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Bắt lỗi Email: Phải có đuôi @gmail.com
+            if (!email.toLowerCase().endsWith("@gmail.com")) {
+                Toast.makeText(this, "Email không hợp lệ (Phải có đuôi @gmail.com)!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             ContentValues values = new ContentValues();
             values.put("maNCC", ma);
             values.put("tenNCC", ten);
@@ -351,6 +363,18 @@ public class SupplierActivity extends AppCompatActivity {
 
             if (ten.isEmpty() || sdt.isEmpty() || email.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đủ thông tin bắt buộc!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Bắt lỗi Số điện thoại: Bắt đầu bằng '0' và có đúng 10 chữ số
+            if (!sdt.matches("^0\\d{9}$")) {
+                Toast.makeText(this, "Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Bắt lỗi Email: Phải có đuôi @gmail.com
+            if (!email.toLowerCase().endsWith("@gmail.com")) {
+                Toast.makeText(this, "Email không hợp lệ (Phải có đuôi @gmail.com)!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
