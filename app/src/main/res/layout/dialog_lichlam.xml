@@ -21,33 +21,28 @@
             android:gravity="center"
             android:layout_marginBottom="20dp"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <!-- Bước 1: Thay thế EditText bằng Spinner chọn nhân viên -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:hint="Mã lịch">
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edtMaLich"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:text="Nhân viên:"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:hint="Mã nhân viên">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edtMaNhanVien"
+            <Spinner
+                android:id="@+id/spMaNhanVien"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_height="48dp"
+                android:background="@android:drawable/btn_dropdown"
+                android:spinnerMode="dropdown"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

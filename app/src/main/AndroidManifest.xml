@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BAICUOIKI">
 
-        <!-- Màn hình Đăng Nhập - CHẠY ĐẦU TIÊN -->
+        <!-- Màn hình Đăng Nhập -->
         <activity
             android:name="com.example.dangnhap.activities.LoginActivity"
             android:exported="true">
@@ -24,65 +24,33 @@
             </intent-filter>
         </activity>
 
+        <!-- Các màn hình thuộc folder activity -->
         <activity android:name=".activity.OrderActivity" />
         <activity android:name=".activity.OrderDetailActivity" />
         <activity android:name=".activity.CheckoutActivity" android:exported="false" />
+        <activity android:name=".activity.SupplierActivity" android:exported="false" />
+        <activity android:name=".activity.CustomerActivity" android:exported="false" />
+        <activity android:name=".activity.CartActivity" android:exported="true" />
+        <activity android:name=".activity.ProductActivity" android:exported="false" />
+        <activity android:name=".activity.LichLamActivity" android:exported="false" />
+        <activity android:name=".activity.ProductDetailActivity" android:exported="false" />
 
-        <!-- Activity từ dự án Khuyến mại -->
-        <activity
-            android:name="com.example.qlkhuyenmai.cskh.CSKHActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.qlkhuyenmai.KhuyenMaiMainActivity"
-            android:exported="false" />
-
-        <!-- Module Đăng Nhập -->
-        <activity
-            android:name="com.example.dangnhap.activities.AdminActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.dangnhap.activities.NhanVienActivity"
-            android:exported="false" />
-
-        <!-- Module Kho & Kế Toán -->
-        <activity
-            android:name="com.example.kho_ketoan.activities.KhoKeToanMainActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.kho_ketoan.activities.PhieuKhoActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.kho_ketoan.activities.AddEditPhieuKhoActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.kho_ketoan.activities.ChiTietPhieuKhoActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.kho_ketoan.activities.BangLuongActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.example.kho_ketoan.activities.ThongKeActivity"
-            android:exported="false" />
-
+        <!-- Màn hình chính -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-        <activity
-            android:name=".activity.SupplierActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activity.CustomerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activity.CartActivity"
-            android:exported="true" />
-        <activity
-            android:name=".activity.ProductActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activity.LichLamActivity"
-            android:exported="false" />
+
+        <!-- Các module khác -->
+        <activity android:name="com.example.qlkhuyenmai.cskh.CSKHActivity" />
+        <activity android:name="com.example.qlkhuyenmai.KhuyenMaiMainActivity" />
+        <activity android:name="com.example.dangnhap.activities.AdminActivity" />
+        <activity android:name="com.example.dangnhap.activities.NhanVienActivity" />
+        <activity android:name="com.example.kho_ketoan.activities.KhoKeToanMainActivity" />
+        <activity android:name="com.example.kho_ketoan.activities.PhieuKhoActivity" />
+        <activity android:name="com.example.kho_ketoan.activities.AddEditPhieuKhoActivity" />
+        <activity android:name="com.example.kho_ketoan.activities.ChiTietPhieuKhoActivity" />
+        <activity android:name="com.example.kho_ketoan.activities.BangLuongActivity" />
+        <activity android:name="com.example.kho_ketoan.activities.ThongKeActivity" />
 
     </application>
-
 </manifest>

@@ -5,7 +5,7 @@ package com.example.baicuoiki.model;
  */
 public class LichLamViec {
     // Khai báo các thuộc tính với phạm vi truy cập private (Đóng gói)
-    private String maLich;
+    private long id;
     private String maNhanVien;
     private String ngayLamViec;
     private String caLam;
@@ -16,21 +16,21 @@ public class LichLamViec {
     }
 
     // Constructor đầy đủ 5 tham số để khởi tạo đối tượng nhanh
-    public LichLamViec(String maLich, String maNhanVien, String ngayLamViec, String caLam, String nhiemVu) {
-        this.maLich = maLich;
+    public LichLamViec(long id, String maNhanVien, String ngayLamViec, String caLam, String nhiemVu) {
+        this.id = id;
         this.maNhanVien = maNhanVien;
         this.ngayLamViec = ngayLamViec;
         this.caLam = caLam;
         this.nhiemVu = nhiemVu;
     }
 
-    // Các phương thức Getter và Setter cho maLich
-    public String getMaLich() {
-        return maLich;
+    // Các phương thức Getter và Setter cho id
+    public long getId() {
+        return id;
     }
 
-    public void setMaLich(String maLich) {
-        this.maLich = maLich;
+    public void setId(long id) {
+        this.id = id;
     }
 
     // Các phương thức Getter và Setter cho maNhanVien

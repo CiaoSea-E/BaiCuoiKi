@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.baicuoiki.R;
 import com.example.baicuoiki.activity.CheckoutActivity;
+import com.example.baicuoiki.activity.ProductDetailActivity;
 import com.example.baicuoiki.model.CartItem;
 import com.example.baicuoiki.model.CartManager;
 import com.example.baicuoiki.model.Product;
@@ -56,7 +57,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 .error(R.drawable.ic_shopping_cart)
                 .into(holder.imgProduct);
 
-        // Mở Bottom Sheet khi nhấn Mua ngay
+        // --- SỬA LỖI TẠI ĐÂY: Gọi ProductDetailActivity từ đúng package .activity ---
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_DATA", product);
+            context.startActivity(intent);
+        });
+        
         holder.btnBuyNow.setOnClickListener(v -> showBuyBottomSheet(product));
 
         holder.btnAddToCart.setOnClickListener(v -> {
@@ -80,7 +87,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         ImageView btnClose = view.findViewById(R.id.btnCloseSheet);
         Button btnConfirmBuy = view.findViewById(R.id.btnConfirmBuySheet);
 
-        // Load data
         tvNameSheet.setText(product.getName());
         DecimalFormat formatter = new DecimalFormat("###,###,###");
         tvPriceSheet.setText(formatter.format(product.getPrice()) + "đ");
@@ -105,9 +111,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         btnConfirmBuy.setOnClickListener(v -> {
             CartItem item = new CartItem(product.getId(), product.getName(), product.getPrice(), quantity, product.getImage());
-            // Sử dụng buyNow thay vì addToCart để tránh cộng dồn số lượng khi nhấn mua ngay nhiều lần
             CartManager.getInstance().buyNow(item);
-
             bottomSheetDialog.dismiss();
             context.startActivity(new Intent(context, CheckoutActivity.class));
         });

@@ -72,14 +72,14 @@ public class MainActivity extends AppCompatActivity {
             productList.clear();
             DatabaseHelper dbHelper = new DatabaseHelper(this);
             SQLiteDatabase db = dbHelper.getReadableDatabase();
-            
+
             Cursor cursor;
             if (keyword.isEmpty()) {
                 cursor = db.rawQuery("SELECT * FROM SAN_PHAM", null);
             } else {
                 cursor = db.rawQuery("SELECT * FROM SAN_PHAM WHERE tenSanpham LIKE ?", new String[]{"%" + keyword + "%"});
             }
-            
+
             if (cursor.moveToFirst()) {
                 do {
                     Product p = new Product();
@@ -93,11 +93,13 @@ public class MainActivity extends AppCompatActivity {
                     p.setExpiryDate(cursor.getString(7));
                     p.setStatus(cursor.getString(8));
                     p.setSupplierId(cursor.getString(9));
+
                     productList.add(p);
                 } while (cursor.moveToNext());
             }
             cursor.close();
             db.close();
+            
             productAdapter.notifyDataSetChanged();
         }
     }
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         if (btnPromotion != null) btnPromotion.setOnClickListener(v -> startActivity(new Intent(this, KhuyenMaiMainActivity.class)));
         if (btnCSKH != null) btnCSKH.setOnClickListener(v -> startActivity(new Intent(this, CSKHActivity.class)));
         if (btnProductManage != null) btnProductManage.setOnClickListener(v -> startActivity(new Intent(this, ProductActivity.class)));
-        
+
         // Sự kiện cho nút Kho & Kế toán
         if (btnKhoKeToan != null) {
             btnKhoKeToan.setOnClickListener(v -> startActivity(new Intent(this, KhoKeToanMainActivity.class)));

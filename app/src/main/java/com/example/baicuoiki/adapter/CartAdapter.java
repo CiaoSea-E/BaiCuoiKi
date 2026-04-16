@@ -59,7 +59,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             holder.btnPlus.setVisibility(View.GONE);
             holder.btnMinus.setVisibility(View.GONE);
             holder.btnRemove.setVisibility(View.GONE);
-            // Thêm text "x1", "x2" để hiển thị số lượng thay vì nút bấm
             holder.tvQuantity.setText("x" + item.getQuantity());
         } else {
             holder.cbSelect.setVisibility(View.VISIBLE);

@@ -1,6 +1,7 @@
 package com.example.baicuoiki.activity;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -28,18 +29,17 @@ import com.bumptech.glide.Glide;
 import com.example.baicuoiki.R;
 import com.example.baicuoiki.model.Product;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 import database.DatabaseHelper;
 
-/**
- * Senior Android Developer - Refactored Product Management
- * Tối ưu hiển thị chi tiết sản phẩm và JOIN Tên nhà cung cấp.
- * Hỗ trợ chọn ảnh từ thư viện và lưu vào bộ nhớ trong.
- */
 public class ProductActivity extends AppCompatActivity {
 
     private ListView lvProducts;
@@ -52,9 +52,9 @@ public class ProductActivity extends AppCompatActivity {
     private ArrayList<Product> productList;
     private ProductAdapter adapter;
 
-    // Biến tạm để lưu đường dẫn ảnh đang chọn trong dialog
     private String currentSelectedImageUri = "";
     private ImageView imgPreviewInDialog;
+    private EditText edtImageInDialog;
 
     private static final int PICK_IMAGE_REQUEST = 101;
 
@@ -66,11 +66,6 @@ public class ProductActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
-        }
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Quản lý sản phẩm");
         }
 
         dbHelper = new DatabaseHelper(this);
@@ -102,22 +97,15 @@ public class ProductActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void loadDataFromDatabase(String keyword) {
         productList.clear();
         Cursor cursor = null;
         try {
-            String sql = "SELECT sp.*, ncc.tenNCC FROM SAN_PHAM sp " +
-                         "LEFT JOIN NHA_CUNG_CAP ncc ON sp.maNCC = ncc.maNCC";
-            
+            String sql = "SELECT sp.maSanpham, sp.tenSanpham, sp.hinhAnh, sp.motaSanpham, " +
+                    "sp.donViTinh, sp.giaDon, sp.soLuongTon, sp.hanSuDung, sp.maNCC, " +
+                    "ncc.tenNCC AS tenNhaCungCap " +
+                    "FROM SAN_PHAM sp LEFT JOIN NHA_CUNG_CAP ncc ON sp.maNCC = ncc.maNCC";
+
             if (keyword.isEmpty()) {
                 cursor = db.rawQuery(sql, null);
             } else {
@@ -126,18 +114,29 @@ public class ProductActivity extends AppCompatActivity {
             }
 
             if (cursor != null) {
+                int idxId = cursor.getColumnIndexOrThrow("maSanpham");
+                int idxName = cursor.getColumnIndexOrThrow("tenSanpham");
+                int idxImage = cursor.getColumnIndexOrThrow("hinhAnh");
+                int idxDesc = cursor.getColumnIndexOrThrow("motaSanpham");
+                int idxUnit = cursor.getColumnIndexOrThrow("donViTinh");
+                int idxPrice = cursor.getColumnIndexOrThrow("giaDon");
+                int idxStock = cursor.getColumnIndexOrThrow("soLuongTon");
+                int idxExpiry = cursor.getColumnIndexOrThrow("hanSuDung");
+                int idxSuppId = cursor.getColumnIndexOrThrow("maNCC");
+                int idxSuppName = cursor.getColumnIndexOrThrow("tenNhaCungCap");
+
                 while (cursor.moveToNext()) {
                     Product p = new Product();
-                    p.setId(cursor.getString(0));
-                    p.setName(cursor.getString(1));
-                    p.setImage(cursor.getString(2));
-                    p.setDescription(cursor.getString(3));
-                    p.setUnit(cursor.getString(4));
-                    p.setPrice(cursor.getDouble(5));
-                    p.setStock(cursor.getInt(6));
-                    p.setExpiryDate(cursor.getString(7));
-                    p.setSupplierId(cursor.getString(9));
-                    p.setSupplierName(cursor.getString(10));
+                    p.setId(cursor.getString(idxId));
+                    p.setName(cursor.getString(idxName));
+                    p.setImage(cursor.getString(idxImage));
+                    p.setDescription(cursor.getString(idxDesc));
+                    p.setUnit(cursor.getString(idxUnit));
+                    p.setPrice(cursor.getDouble(idxPrice));
+                    p.setStock(cursor.getInt(idxStock));
+                    p.setExpiryDate(cursor.getString(idxExpiry));
+                    p.setSupplierId(cursor.getString(idxSuppId));
+                    p.setSupplierName(cursor.getString(idxSuppName));
                     productList.add(p);
                 }
                 cursor.close();
@@ -150,7 +149,7 @@ public class ProductActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi truy vấn: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -162,82 +161,68 @@ public class ProductActivity extends AppCompatActivity {
         TextView tvTitle = dialog.findViewById(R.id.tvTitle);
         EditText edtId = dialog.findViewById(R.id.edtId);
         EditText edtName = dialog.findViewById(R.id.edtName);
+        edtImageInDialog = dialog.findViewById(R.id.edtImage);
         EditText edtDesc = dialog.findViewById(R.id.edtDescription);
         EditText edtUnit = dialog.findViewById(R.id.edtUnit);
         EditText edtPrice = dialog.findViewById(R.id.edtPrice);
         EditText edtStock = dialog.findViewById(R.id.edtStock);
         EditText edtExpiry = dialog.findViewById(R.id.edtExpiry);
-        
         imgPreviewInDialog = dialog.findViewById(R.id.imgPreview);
         Button btnChooseImage = dialog.findViewById(R.id.btnChooseImage);
-        
         Button btnSave = dialog.findViewById(R.id.btnSave);
-        Button btnDelete = dialog.findViewById(R.id.btnDelete);
+        android.widget.Spinner spnSupplier = dialog.findViewById(R.id.spnSupplier);
 
-        currentSelectedImageUri = ""; // Reset khi mở dialog
-
+        // --- CÀI ĐẶT DATE PICKER CHO HẠN SỬ DỤNG ---
         edtExpiry.setFocusable(false);
         edtExpiry.setClickable(true);
         edtExpiry.setOnClickListener(v -> {
-            java.util.Calendar calendar = java.util.Calendar.getInstance();
-            int year = calendar.get(java.util.Calendar.YEAR);
-            int month = calendar.get(java.util.Calendar.MONTH);
-            int day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
+            Calendar calendar = Calendar.getInstance();
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-            new android.app.DatePickerDialog(ProductActivity.this,
+            DatePickerDialog datePickerDialog = new DatePickerDialog(ProductActivity.this,
                     (view, selectedYear, selectedMonth, selectedDay) -> {
                         calendar.set(selectedYear, selectedMonth, selectedDay);
-                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                         edtExpiry.setText(sdf.format(calendar.getTime()));
-                    }, year, month, day).show();
+                    }, year, month, day);
+            datePickerDialog.show();
         });
 
-        android.widget.Spinner spnSupplier = dialog.findViewById(R.id.spnSupplier);
         ArrayList<String> supplierNames = new ArrayList<>();
         ArrayList<String> supplierIds = new ArrayList<>();
-
         try {
             Cursor cursorNcc = db.rawQuery("SELECT maNCC, tenNCC FROM NHA_CUNG_CAP", null);
-            if (cursorNcc != null) {
-                while (cursorNcc.moveToNext()) {
-                    supplierIds.add(cursorNcc.getString(0));
-                    supplierNames.add(cursorNcc.getString(1));
-                }
-                cursorNcc.close();
+            while (cursorNcc.moveToNext()) {
+                supplierIds.add(cursorNcc.getString(0));
+                supplierNames.add(cursorNcc.getString(1));
             }
-        } catch (Exception e) {
-            Toast.makeText(this, "Lỗi lấy dữ liệu NCC: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+            cursorNcc.close();
+        } catch (Exception ignored) {}
 
-        android.widget.ArrayAdapter<String> spinnerAdapter = new android.widget.ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_dropdown_item, supplierNames);
-        spnSupplier.setAdapter(spinnerAdapter);
+        spnSupplier.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, supplierNames));
 
         boolean isEdit = (product != null);
-        btnDelete.setVisibility(View.GONE);
+        currentSelectedImageUri = isEdit ? product.getImage() : "";
 
         if (isEdit) {
             tvTitle.setText("SỬA SẢN PHẨM");
             edtId.setText(product.getId());
             edtId.setEnabled(false);
             edtName.setText(product.getName());
+            edtImageInDialog.setText(product.getImage());
             edtDesc.setText(product.getDescription());
             edtUnit.setText(product.getUnit());
             edtPrice.setText(String.valueOf(product.getPrice()));
             edtStock.setText(String.valueOf(product.getStock()));
             edtExpiry.setText(product.getExpiryDate());
-            
-            currentSelectedImageUri = product.getImage();
+
             if (currentSelectedImageUri != null && !currentSelectedImageUri.isEmpty()) {
                 Glide.with(this).load(currentSelectedImageUri).into(imgPreviewInDialog);
             }
-
-            if (product.getSupplierId() != null) {
-                int position = supplierIds.indexOf(product.getSupplierId());
-                if (position >= 0) spnSupplier.setSelection(position);
-            }
-        } else {
-            tvTitle.setText("THÊM SẢN PHẨM MỚI");
+            int position = supplierIds.indexOf(product.getSupplierId());
+            if (position >= 0) spnSupplier.setSelection(position);
         }
 
         btnChooseImage.setOnClickListener(v -> {
@@ -247,44 +232,38 @@ public class ProductActivity extends AppCompatActivity {
         });
 
         btnSave.setOnClickListener(v -> {
-            try {
-                String id = edtId.getText().toString().trim();
-                String name = edtName.getText().toString().trim();
-
-                if (id.isEmpty() || name.isEmpty()) {
-                    Toast.makeText(this, "Mã và Tên không được để trống!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                ContentValues values = new ContentValues();
-                values.put("maSanpham", id);
-                values.put("tenSanpham", name);
-                values.put("hinhAnh", currentSelectedImageUri); // Dùng path đã chọn
-                values.put("motaSanpham", edtDesc.getText().toString().trim());
-                values.put("donViTinh", edtUnit.getText().toString().trim());
-                values.put("giaDon", Double.parseDouble(edtPrice.getText().toString().isEmpty() ? "0" : edtPrice.getText().toString()));
-                values.put("soLuongTon", Integer.parseInt(edtStock.getText().toString().isEmpty() ? "0" : edtStock.getText().toString()));
-                values.put("hanSuDung", edtExpiry.getText().toString().trim());
-
-                int selectedPosition = spnSupplier.getSelectedItemPosition();
-                if (selectedPosition >= 0) {
-                    values.put("maNCC", supplierIds.get(selectedPosition));
-                }
-
-                if (isEdit) {
-                    db.update("SAN_PHAM", values, "maSanpham=?", new String[]{id});
-                    Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
-                } else {
-                    long res = db.insert("SAN_PHAM", null, values);
-                    if (res != -1) Toast.makeText(this, "Thêm mới thành công!", Toast.LENGTH_SHORT).show();
-                    else Toast.makeText(this, "Thêm thất bại!", Toast.LENGTH_SHORT).show();
-                }
-
-                dialog.dismiss();
-                loadDataFromDatabase("");
-            } catch (Exception e) {
-                Toast.makeText(this, "Lỗi lưu dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            String id = edtId.getText().toString().trim();
+            String name = edtName.getText().toString().trim();
+            if (id.isEmpty() || name.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập Mã và Tên!", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            ContentValues values = new ContentValues();
+            values.put("maSanpham", id);
+            values.put("tenSanpham", name);
+            values.put("hinhAnh", currentSelectedImageUri); 
+            values.put("motaSanpham", edtDesc.getText().toString().trim());
+            values.put("donViTinh", edtUnit.getText().toString().trim());
+            try {
+                values.put("giaDon", Double.parseDouble(edtPrice.getText().toString()));
+                values.put("soLuongTon", Integer.parseInt(edtStock.getText().toString()));
+            } catch (Exception e) {
+                values.put("giaDon", 0);
+                values.put("soLuongTon", 0);
+            }
+            values.put("hanSuDung", edtExpiry.getText().toString().trim());
+
+            int selPos = spnSupplier.getSelectedItemPosition();
+            if (selPos >= 0) values.put("maNCC", supplierIds.get(selPos));
+
+            if (isEdit) {
+                db.update("SAN_PHAM", values, "maSanpham=?", new String[]{id});
+            } else {
+                db.insert("SAN_PHAM", null, values);
+            }
+            dialog.dismiss();
+            loadDataFromDatabase("");
         });
 
         dialog.show();
@@ -302,6 +281,9 @@ public class ProductActivity extends AppCompatActivity {
                     if (imgPreviewInDialog != null) {
                         Glide.with(this).load(savedPath).into(imgPreviewInDialog);
                     }
+                    if (edtImageInDialog != null) {
+                        edtImageInDialog.setText(savedPath);
+                    }
                 }
             }
         }
@@ -312,12 +294,9 @@ public class ProductActivity extends AppCompatActivity {
             String fileName = "prod_" + System.currentTimeMillis() + ".jpg";
             InputStream is = getContentResolver().openInputStream(uri);
             FileOutputStream fos = openFileOutput(fileName, Context.MODE_PRIVATE);
-            
             byte[] buffer = new byte[1024];
             int read;
-            while ((read = is.read(buffer)) != -1) {
-                fos.write(buffer, 0, read);
-            }
+            while ((read = is.read(buffer)) != -1) fos.write(buffer, 0, read);
             is.close();
             fos.close();
             return getFilesDir() + "/" + fileName;
@@ -329,19 +308,13 @@ public class ProductActivity extends AppCompatActivity {
 
     private void confirmDelete(Product p) {
         new AlertDialog.Builder(this)
-                .setTitle("Xác nhận xóa")
-                .setMessage("Bạn có chắc chắn muốn xóa sản phẩm [" + p.getName() + "] không?")
-                .setPositiveButton("XÓA", (dialog, which) -> {
-                    try {
-                        db.delete("SAN_PHAM", "maSanpham=?", new String[]{p.getId()});
-                        Toast.makeText(this, "Đã xóa sản phẩm", Toast.LENGTH_SHORT).show();
-                        loadDataFromDatabase("");
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Lỗi khi xóa: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                .setTitle("Xóa sản phẩm")
+                .setMessage("Bạn chắc chắn muốn xóa " + p.getName() + "?")
+                .setPositiveButton("Xóa", (d, w) -> {
+                    db.delete("SAN_PHAM", "maSanpham=?", new String[]{p.getId()});
+                    loadDataFromDatabase("");
                 })
-                .setNegativeButton("HỦY", null)
-                .show();
+                .setNegativeButton("Hủy", null).show();
     }
 
     private class ProductAdapter extends BaseAdapter {
@@ -353,52 +326,30 @@ public class ProductActivity extends AppCompatActivity {
             this.context = context;
             this.list = list;
         }
-
         @Override public int getCount() { return list.size(); }
-        @Override public Object getItem(int position) { return list.get(position); }
-        @Override public long getItemId(int position) { return position; }
-
+        @Override public Object getItem(int pos) { return list.get(pos); }
+        @Override public long getItemId(int pos) { return pos; }
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context).inflate(R.layout.item_product_list, parent, false);
-                holder = new ViewHolder();
-                holder.img = convertView.findViewById(R.id.imgProduct);
-                holder.txtName = convertView.findViewById(R.id.txtName);
-                holder.txtSupplier = convertView.findViewById(R.id.txtSupplierName);
-                holder.txtPrice = convertView.findViewById(R.id.txtPrice);
-                holder.txtInfo = convertView.findViewById(R.id.txtInfo);
-                holder.txtDesc = convertView.findViewById(R.id.txtDesc);
-                holder.btnEditItem = convertView.findViewById(R.id.btnEdit);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
+            if (convertView == null) convertView = LayoutInflater.from(context).inflate(R.layout.item_product_list, parent, false);
             Product p = list.get(position);
+            
+            ImageView img = convertView.findViewById(R.id.imgProduct);
+            TextView txtName = convertView.findViewById(R.id.txtName);
+            TextView txtPrice = convertView.findViewById(R.id.txtPrice);
+            ImageView btnEdit = convertView.findViewById(R.id.btnEdit);
 
-            holder.txtName.setText(p.getName());
-            holder.txtSupplier.setText("NCC: " + (p.getSupplierName() != null ? p.getSupplierName() : "N/A"));
-            holder.txtPrice.setText(formatter.format(p.getPrice()) + "đ");
-            holder.txtInfo.setText("ĐVT: " + p.getUnit() + " | HSD: " + p.getExpiryDate() + " | Kho: " + p.getStock());
-            holder.txtDesc.setText(p.getDescription());
+            txtName.setText(p.getName());
+            txtPrice.setText(formatter.format(p.getPrice()) + "đ");
 
             Glide.with(context)
                     .load(p.getImage())
                     .placeholder(android.R.drawable.ic_menu_gallery)
                     .error(android.R.drawable.ic_menu_report_image)
-                    .into(holder.img);
+                    .into(img);
 
-            holder.btnEditItem.setOnClickListener(v -> showProductDialog(p));
-
+            btnEdit.setOnClickListener(v -> showProductDialog(p));
             return convertView;
-        }
-
-        private class ViewHolder {
-            ImageView img, btnEditItem;
-            TextView txtName, txtSupplier, txtPrice, txtInfo, txtDesc;
         }
     }
 
