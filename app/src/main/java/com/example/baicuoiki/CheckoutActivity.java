@@ -37,7 +37,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private List<CartItem> selectedItems;
     private CartAdapter checkoutAdapter;
     private KhuyenMai selectedVoucher = null;
-    private String currentCustomerId = "KH001"; // Khách hàng mặc định ban đầu
+    private String currentCustomerId = null; // Mặc định chưa chọn khách hàng
     private double subtotal = 0;
     private double discountAmount = 0;
     private DecimalFormat formatter = new DecimalFormat("###,###,###");
@@ -49,9 +49,9 @@ public class CheckoutActivity extends AppCompatActivity {
 
         initViews();
         setupToolbar();
-        loadCustomerInfo(currentCustomerId); 
+        // Bỏ loadCustomerInfo(currentCustomerId) để hiển thị mặc định "Thông tin nhận hàng" từ XML
         loadSelectedProducts();
-        setupCustomerSelection(); 
+        setupCustomerSelection();
         setupVoucherSelection();
         setupOrderAction();
         calculateTotal();
@@ -68,7 +68,7 @@ public class CheckoutActivity extends AppCompatActivity {
         tvCustomerAddress = findViewById(R.id.tvCustomerAddress);
         btnSelectVoucher = findViewById(R.id.btnSelectVoucher);
         btnSubmitOrder = findViewById(R.id.btnSubmitOrder);
-        btnSelectCustomer = findViewById(R.id.btnSelectCustomer); 
+        btnSelectCustomer = findViewById(R.id.btnSelectCustomer);
         if (btnSelectCustomer == null) {
             btnSelectCustomer = (LinearLayout) tvCustomerName.getParent().getParent();
         }
@@ -80,7 +80,7 @@ public class CheckoutActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
-            
+
             // Đổi màu nút quay lại (Back) thành màu cam
             Drawable upArrow = ContextCompat.getDrawable(this, R.drawable.ic_back);
             if (upArrow != null) {
@@ -101,7 +101,7 @@ public class CheckoutActivity extends AppCompatActivity {
             String name = cursor.getString(0);
             String phone = cursor.getString(1);
             String address = cursor.getString(2);
-            
+
             tvCustomerName.setText(name + " (" + phone + ")");
             tvCustomerAddress.setText(address);
             currentCustomerId = customerId;
@@ -114,12 +114,13 @@ public class CheckoutActivity extends AppCompatActivity {
         btnSelectCustomer.setOnClickListener(v -> {
             DatabaseHelper dbHelper = new DatabaseHelper(this);
             SQLiteDatabase db = dbHelper.getReadableDatabase();
-            
-            Cursor cursor = db.rawQuery("SELECT maKhachHang, hoTen, sdt, diaChi FROM KHACH_HANG", null);
-            
+
+            // Chỉ lấy những khách hàng có trạng thái khác "Ngừng hoạt động" (trangThai = 1)
+            Cursor cursor = db.rawQuery("SELECT maKhachHang, hoTen, sdt, diaChi FROM KHACH_HANG WHERE trangThai = 1", null);
+
             List<String> customerList = new ArrayList<>();
             List<String> ids = new ArrayList<>();
-            
+
             while (cursor.moveToNext()) {
                 ids.add(cursor.getString(0));
                 customerList.add(cursor.getString(1) + " - " + cursor.getString(2) + "\n" + cursor.getString(3));
@@ -128,7 +129,7 @@ public class CheckoutActivity extends AppCompatActivity {
             db.close();
 
             if (customerList.isEmpty()) {
-                Toast.makeText(this, "Không có danh sách khách hàng", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Không có danh sách khách hàng hoạt động", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -169,7 +170,7 @@ public class CheckoutActivity extends AppCompatActivity {
 
             String[] voucherDisplay = new String[listVoucher.size() + 1];
             voucherDisplay[0] = "Không sử dụng mã giảm giá";
-            
+
             for (int i = 0; i < listVoucher.size(); i++) {
                 KhuyenMai km = listVoucher.get(i);
                 String valueStr = "Phần trăm".equalsIgnoreCase(km.loaiMa) ? (km.giaTriGiam + "%") : (formatter.format(km.giaTriGiam) + "đ");
@@ -223,6 +224,10 @@ public class CheckoutActivity extends AppCompatActivity {
 
     private void setupOrderAction() {
         btnSubmitOrder.setOnClickListener(v -> {
+            if (currentCustomerId == null) {
+                Toast.makeText(this, "Vui lòng chọn thông tin nhận hàng", Toast.LENGTH_SHORT).show();
+                return;
+            }
             String result = CartManager.getInstance().placeOrderWithTotal(this, currentCustomerId, "Thanh toán khi nhận hàng", subtotal - discountAmount);
             if ("SUCCESS".equals(result)) {
                 Toast.makeText(this, "Đặt hàng thành công!", Toast.LENGTH_LONG).show();

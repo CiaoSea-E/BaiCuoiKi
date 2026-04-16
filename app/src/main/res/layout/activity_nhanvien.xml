@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="QUẢN LÝ NHÂN VIÊN"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/edtMa"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Mã nhân viên"/>
+
+    <EditText
+        android:id="@+id/edtTen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Họ tên"/>
+
+    <EditText
+        android:id="@+id/edtVaiTro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Vai trò (admin/nhanvien)"/>
+
+    <EditText
+        android:id="@+id/edtUserNV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Username liên kết"/>
+
+    <Button
+        android:id="@+id/btnThemNV"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thêm Nhân Viên"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@color/purple_500"/>
+
+    <ListView
+        android:id="@+id/listNV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="16dp"/>
+
+</LinearLayout>
